@@ -7,7 +7,7 @@ QImage Filter::splot(QImage &img, int choose, int *tab) {
     if (img.format() != QImage::Format_RGB32)
         img = img.convertToFormat(QImage::Format_RGB32);
 
-    QImage res(img.width() - 5, img.height() - 5, img.format());
+    QImage res(img.width() - 4, img.height() - 4, img.format());
 
     int *mask;
     switch (choose) {
@@ -68,11 +68,11 @@ QImage Filter::splot(QImage &img, int choose, int *tab) {
     return res;
 }
 
-QImage Filter::splot(QImage &img, int choose, QVector<qint8> selectedTab, int *tab) {
+QImage Filter::splot(QImage &img, int choose, int ** selectedTab, int *tab) {
     if (img.format() != QImage::Format_RGB32)
         img = img.convertToFormat(QImage::Format_RGB32);
 
-    QImage res(img.width() - 5, img.height() - 5, img.format());
+    QImage res(img.width() - 4, img.height() - 4, img.format());
 
     int *mask;
     switch (choose) {
@@ -105,10 +105,9 @@ QImage Filter::splot(QImage &img, int choose, QVector<qint8> selectedTab, int *t
     int b = 0;
     QRgb color;
 
-    int row = 0;
     for (int y = 2; y < img.height() - 2; y++) {
         for (int x = 2; x < img.width() - 2; x++) {
-            if(selectedTab[row + x] != 0) {
+            if(selectedTab[y][x] == 1) {
                 for (int i = 0; i < 5; i++) {
                     const QRgb *imgLine = reinterpret_cast<const QRgb*>(img.scanLine(y - 2 + i));
                     for (int j = 0; j < 5; j++) {
@@ -133,7 +132,6 @@ QImage Filter::splot(QImage &img, int choose, QVector<qint8> selectedTab, int *t
                 res.setPixel(x - 2, y - 2, img.pixel(x - 2, y - 2));
             }
         }
-        row+=img.width();
     }
 
     return res;

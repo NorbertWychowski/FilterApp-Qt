@@ -7,16 +7,19 @@
 class SelectTool {
 public:
     SelectTool(QImage *image);
+    ~SelectTool();
 
     void resizeSelectedTab();
-    QVector<qint8> getSelectedTab();
+    int ** getSelectedTab();
 
     QImage selectByColor(int mouse_x, int mouse_y, int threshold);
+    QImage selectByColor(int mouse_x, int mouse_y, int threshold, int feather);
+    double ** createGaussianKernel(double sigma, int N, int M);
 
     void p();
 
 private:
-    QVector<qint8> selectedTab;
+    int **selectedTab;
     QImage *image;
 };
 

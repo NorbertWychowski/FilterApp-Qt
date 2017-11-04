@@ -34,8 +34,10 @@ private slots:
     void highPassMask();
 
     void thresholdSliderValueChanged(int);
+    void featherSliderValueChanged(int);
     void mousePressEvent(QMouseEvent *event);
     void selectByColorButtonClicked(bool);
+    void featherCheckBoxChanged(bool);
 
 private:
     Ui::MainWindow *ui;

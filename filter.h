@@ -8,7 +8,7 @@ public:
     Filter();
 
     QImage splot(QImage &img, int choose, int *tab = nullptr);
-    QImage splot(QImage &img, int choose, QVector<qint8> selectedTab, int *tab = nullptr);
+    QImage splot(QImage &img, int choose, int **selectedTab, int *tab = nullptr);
 
 private:
     //rozmycie - usredniajacy, dolnoprzepustowy

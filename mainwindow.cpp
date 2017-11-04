@@ -24,6 +24,10 @@ MainWindow::MainWindow(QWidget *parent) :
 
     selectTool = new SelectTool(&image);
 
+    ui->featherSlider->setVisible(false);
+    ui->featherSlider->setEnabled(false);
+    ui->featherLabel->setVisible(false);
+
     connect(ui->actionOpen, SIGNAL(triggered(bool)), this, SLOT(openFileAction()));
     connect(ui->actionSaveAs, SIGNAL(triggered(bool)), this, SLOT(saveFileAction()));
 
@@ -36,7 +40,9 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->graphicsView, SIGNAL(zoomChanged(int)), this, SLOT(zoomChanged(int)));
     connect(ui->horizontalSlider, SIGNAL(valueChanged(int)), this, SLOT(sliderChanged(int)));
     connect(ui->thresholdSlider, SIGNAL(valueChanged(int)), this, SLOT(thresholdSliderValueChanged(int)));
+    connect(ui->featherSlider, SIGNAL(valueChanged(int)), this, SLOT(featherSliderValueChanged(int)));
     connect(ui->selectByColorButton, SIGNAL(clicked(bool)), this, SLOT(selectByColorButtonClicked(bool)));
+    connect(ui->featherCheckBox, SIGNAL(clicked(bool)), this, SLOT(featherCheckBoxChanged(bool)));
 }
 
 MainWindow::~MainWindow() {
@@ -71,6 +77,7 @@ void MainWindow::openFileAction() {
 
     image.load(file);
     selectTool->resizeSelectedTab();
+    selectedAreaItem->setPixmap(QPixmap());
 
     imageItem->setPixmap(QPixmap::fromImage(image));
 }
@@ -88,7 +95,7 @@ void MainWindow::customMask() {
 }
 
 void MainWindow::setCustomMask(int *tab) {
-    if(ui->selectByColorButton->isChecked())
+    if (ui->selectByColorButton->isChecked())
         image = filter.splot(image, 5, selectTool->getSelectedTab(), tab);
     else
         image = filter.splot(image, 5, tab);
@@ -99,7 +106,7 @@ void MainWindow::setCustomMask(int *tab) {
 }
 
 void MainWindow::laplaceMask() {
-    if(ui->selectByColorButton->isChecked())
+    if (ui->selectByColorButton->isChecked())
         image = filter.splot(image, 2, selectTool->getSelectedTab());
     else
         image = filter.splot(image, 2);
@@ -108,7 +115,7 @@ void MainWindow::laplaceMask() {
 }
 
 void MainWindow::squareMask() {
-    if(ui->selectByColorButton->isChecked())
+    if (ui->selectByColorButton->isChecked())
         image = filter.splot(image, 1, selectTool->getSelectedTab());
     else
         image = filter.splot(image, 1);
@@ -117,7 +124,7 @@ void MainWindow::squareMask() {
 }
 
 void MainWindow::gaussMask() {
-    if(ui->selectByColorButton->isChecked())
+    if (ui->selectByColorButton->isChecked())
         image = filter.splot(image, 3, selectTool->getSelectedTab());
     else
         image = filter.splot(image, 3);
@@ -126,7 +133,7 @@ void MainWindow::gaussMask() {
 }
 
 void MainWindow::highPassMask() {
-    if(ui->selectByColorButton->isChecked())
+    if (ui->selectByColorButton->isChecked())
         image = filter.splot(image, 4, selectTool->getSelectedTab());
     else
         image = filter.splot(image, 4);
@@ -138,16 +145,32 @@ void MainWindow::thresholdSliderValueChanged(int value) {
     ui->thresholdLabel->setNum(value);
 }
 
+void MainWindow::featherSliderValueChanged(int value) {
+    ui->featherLabel->setNum(value);
+}
+
 void MainWindow::mousePressEvent(QMouseEvent *event) {
-    if((event->buttons() & Qt::LeftButton) && ui->selectByColorButton->isChecked()) {
+    if ((event->buttons() & Qt::LeftButton) && ui->selectByColorButton->isChecked()) {
         QPoint local = ui->graphicsView->mapFromGlobal(event->globalPos());
         QPointF l = ui->graphicsView->mapToScene(local);
-        selectedAreaItem->setPixmap(QPixmap::fromImage(selectTool->selectByColor(l.x(), l.y(), ui->thresholdSlider->value())));
+        double value = ui->featherSlider->value()/10;
+        if (ui->featherCheckBox->isChecked() && value != 0) {
+            selectedAreaItem->setPixmap(QPixmap::fromImage(selectTool->selectByColor(l.x(), l.y(), ui->thresholdSlider->value(), value)));
+        } else {
+            selectedAreaItem->setPixmap(QPixmap::fromImage(selectTool->selectByColor(l.x(), l.y(), ui->thresholdSlider->value())));
+        }
+
     }
 }
 
 void MainWindow::selectByColorButtonClicked(bool b) {
-    if(!b) {
+    if (!b) {
         selectedAreaItem->setPixmap(QPixmap());
     }
+}
+
+void MainWindow::featherCheckBoxChanged(bool b) {
+    ui->featherSlider->setEnabled(b);
+    ui->featherSlider->setVisible(b);
+    ui->featherLabel->setVisible(b);
 }
