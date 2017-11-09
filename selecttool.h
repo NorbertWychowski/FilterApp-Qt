@@ -14,7 +14,6 @@ public:
 
     QImage selectByColor(int mouse_x, int mouse_y, int threshold);
     QImage selectByColor(int mouse_x, int mouse_y, int threshold, int feather);
-    double ** createGaussianKernel(double sigma, int N, int M);
 
     void p();
 

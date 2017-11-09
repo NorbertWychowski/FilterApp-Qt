@@ -26,12 +26,12 @@ private slots:
     void openFileAction();
     void saveFileAction();
 
-    void customMask();
-    void setCustomMask(int *);
-    void laplaceMask();
-    void squareMask();
-    void gaussMask();
-    void highPassMask();
+    void customFilter();
+    void setCustomFilter(Matrix matrix);
+    void laplaceFilter();
+    void lowPassFilter();
+    void gaussFilter();
+    void highPassFilter();
 
     void thresholdSliderValueChanged(int);
     void featherSliderValueChanged(int);

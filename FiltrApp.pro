@@ -30,7 +30,10 @@ SOURCES += \
     filter.cpp \
     custommaskdialog.cpp \
     selecttool.cpp \
-    labconverter.cpp
+    labconverter.cpp \
+    convolution.cpp \
+    matrix.cpp \
+    gaussianblur.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -38,7 +41,10 @@ HEADERS += \
     filter.h \
     custommaskdialog.h \
     selecttool.h \
-    labconverter.h
+    labconverter.h \
+    convolution.h \
+    matrix.h \
+    gaussianblur.h
 
 FORMS += \
         mainwindow.ui \

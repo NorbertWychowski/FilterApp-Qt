@@ -16,6 +16,7 @@ CustomMaskDialog::CustomMaskDialog(QWidget *parent) :
         QSpinBox *spinBox = new QSpinBox();
         spinBox->setMinimum(-100);
         spinBox->setMaximum(100);
+        spinBox->setValue(0);
         spinBox->setButtonSymbols(QSpinBox::NoButtons);
         qobject_cast<QGridLayout*>(ui->widget->layout())->addWidget(spinBox, j, i % 5);
         spinBoxes.push_back(spinBox);
@@ -35,12 +36,13 @@ CustomMaskDialog::~CustomMaskDialog() {
 }
 
 void CustomMaskDialog::buttonBoxAccepted() {
-    int *tab = new int[25];
+    Matrix matrix(5);
     int i = 0;
+    int j = 0;
 
     for (QSpinBox *spinBox : spinBoxes) {
-        tab[i++] = spinBox->value();
+        matrix[i++][j] = spinBox->value();
+        if(i == 5) j++;
     }
-
-    emit customMask(tab);
+    emit customMask(matrix);
 }

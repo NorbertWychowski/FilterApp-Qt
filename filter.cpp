@@ -1,66 +1,77 @@
 #include "filter.h"
+#include "QtMath"
+#include <QDebug>
 
 Filter::Filter() {
 }
 
-QImage Filter::splot(QImage &img, int choose, int *tab) {
-    if (img.format() != QImage::Format_RGB32)
-        img = img.convertToFormat(QImage::Format_RGB32);
-
-    QImage res(img.width() - 4, img.height() - 4, img.format());
-
-    int *mask;
+QImage Filter::splot(QImage &img, FILTER choose, Matrix userKernel) {
+    Matrix kernel;
+    GaussianBlur *blur = nullptr;
+    QImage res;
     switch (choose) {
-    case 1:
-        mask = mask1;
+    case LOWPASS_FILTER:
+        kernel = convolution.getLowPassKernel();
         break;
-    case 2:
-        mask = mask2;
+    case LAPLACE_FILTER:
+        kernel = convolution.getLaplaceKernel();
         break;
-    case 3:
-        mask = mask3;
+    case HIGHPASS_FILTER:
+        kernel = convolution.getHighPassKernel();
         break;
-    case 4:
-        mask = mask4;
+    case GAUSSIAN_FILTER:
+        blur = new GaussianBlur(img);
+        res =  blur->blur(5);
         break;
-    case 5:
-        mask = tab;
+    case USER_FILTER:
+        kernel = userKernel;
         break;
     default:
         break;
     }
 
-    int norm = 0;
-    for (int i = 0; i<25; i++) {
-        norm += mask[i];
+    if(blur != nullptr) {
+        delete blur;
+        return res;
     }
+
+    int N = kernel.getNDimension();
+    int M = kernel.getMDimension();
+    double norm = 0;
+    for(int i=0; i<N; ++i)
+        for(int j=0; j<M; ++j)
+            norm += kernel[i][j];
 
     int r = 0;
     int g = 0;
     int b = 0;
     QRgb color;
+    if (img.format() != QImage::Format_RGB32)
+        img = img.convertToFormat(QImage::Format_RGB32);
 
-    for (int y = 2; y < img.height() - 2; y++) {
-        for (int x = 2; x < img.width() - 2; x++) {
-            for (int i = 0; i < 5; i++) {
-                const QRgb *imgLine = reinterpret_cast<const QRgb*>(img.scanLine(y - 2 + i));
-                for (int j = 0; j < 5; j++) {
-                    color = imgLine[x - 2 + j];
-                    r += mask[i * 5 + j] * qRed(color);
-                    g += mask[i * 5 + j] * qGreen(color);
-                    b += mask[i * 5 + j] * qBlue(color);
+    res = QImage(img.width() - kernel.getMDimension() + 1, img.height() - kernel.getNDimension() + 1, img.format());
+
+    for (int y = N/2; y < img.height() - N/2; ++y) {
+        for (int x = M/2; x < img.width() - M/2; ++x) {
+            for (int i = 0; i<M; ++i) {
+                const QRgb *imgLine = reinterpret_cast<const QRgb*>(img.scanLine(y - N/2 + i));
+                for (int j = 0; j<N; ++j) {
+                    color = imgLine[x - N + j];
+                    r += kernel[i][j] * qRed(color);
+                    g += kernel[i][j] * qGreen(color);
+                    b += kernel[i][j] * qBlue(color);
                 }
             }
             if (norm != 0) {
-                r = qBound(0, r / norm, 255);
-                g = qBound(0, g / norm, 255);
-                b = qBound(0, b / norm, 255);
+                r = qBound(0, int(r / norm), 255);
+                g = qBound(0, int(g / norm), 255);
+                b = qBound(0, int(b / norm), 255);
             } else {
                 r = qBound(0, r, 255);
                 g = qBound(0, g, 255);
                 b = qBound(0, b, 255);
             }
-            res.setPixel(x - 2, y - 2, qRgb(r, g, b));
+            res.setPixel(x - M/2, y - N/2, qRgb(r, g, b));
             r = g = b = 0;
         }
     }
@@ -68,71 +79,69 @@ QImage Filter::splot(QImage &img, int choose, int *tab) {
     return res;
 }
 
-QImage Filter::splot(QImage &img, int choose, int ** selectedTab, int *tab) {
-    if (img.format() != QImage::Format_RGB32)
-        img = img.convertToFormat(QImage::Format_RGB32);
-
-    QImage res(img.width() - 4, img.height() - 4, img.format());
-
-    int *mask;
+QImage Filter::splot(QImage &img, FILTER choose, int ** selectedTab, Matrix userKernel) {
+    Matrix kernel;
     switch (choose) {
-    case 1:
-        mask = mask1;
+    case LOWPASS_FILTER:
+        kernel = convolution.getLowPassKernel();
         break;
-    case 2:
-        mask = mask2;
+    case LAPLACE_FILTER:
+        kernel = convolution.getLaplaceKernel();
         break;
-    case 3:
-        mask = mask3;
+    case HIGHPASS_FILTER:
+        kernel = convolution.getHighPassKernel();
         break;
-    case 4:
-        mask = mask4;
+    case GAUSSIAN_FILTER:
+        kernel = convolution.getGaussianKernel(5);
         break;
-    case 5:
-        mask = tab;
+    case USER_FILTER:
+        kernel = userKernel;
         break;
     default:
         break;
     }
 
-    int norm = 0;
-    for (int i = 0; i<25; i++) {
-        norm += mask[i];
-    }
+    int N = kernel.getNDimension();
+    int M = kernel.getMDimension();
+    double norm = 0;
+    for(int i=0; i<M; ++i)
+        for(int j=0; j<N; ++j)
+            norm += kernel[i][j];
 
     int r = 0;
     int g = 0;
     int b = 0;
     QRgb color;
+    if (img.format() != QImage::Format_RGB32)
+        img = img.convertToFormat(QImage::Format_RGB32);
 
-    for (int y = 2; y < img.height() - 2; y++) {
-        for (int x = 2; x < img.width() - 2; x++) {
+    QImage res(img.width() - M + 1, img.height() - N + 1, img.format());
+
+    for (int y = N/2; y < img.height() - N/2; ++y) {
+        for (int x = M/2; x < img.width() - M/2; ++x) {
             if(selectedTab[y][x] == 1) {
-                for (int i = 0; i < 5; i++) {
-                    const QRgb *imgLine = reinterpret_cast<const QRgb*>(img.scanLine(y - 2 + i));
-                    for (int j = 0; j < 5; j++) {
-                        color = imgLine[x - 2 + j];
-                        r += mask[i * 5 + j] * qRed(color);
-                        g += mask[i * 5 + j] * qGreen(color);
-                        b += mask[i * 5 + j] * qBlue(color);
+                for (int i = 0; i<M; ++i) {
+                    const QRgb *imgLine = reinterpret_cast<const QRgb*>(img.scanLine(y - N/2 + i));
+                    for (int j = 0; j<N; ++j) {
+                        color = imgLine[x - N + j];
+                        r += kernel[i][j] * qRed(color);
+                        g += kernel[i][j] * qGreen(color);
+                        b += kernel[i][j] * qBlue(color);
                     }
                 }
                 if (norm != 0) {
-                    r = qBound(0, r / norm, 255);
-                    g = qBound(0, g / norm, 255);
-                    b = qBound(0, b / norm, 255);
+                    r = qBound(0, int(r / norm), 255);
+                    g = qBound(0, int(g / norm), 255);
+                    b = qBound(0, int(b / norm), 255);
                 } else {
                     r = qBound(0, r, 255);
                     g = qBound(0, g, 255);
                     b = qBound(0, b, 255);
                 }
-                res.setPixel(x - 2, y - 2, qRgb(r, g, b));
+                res.setPixel(x - M/2, y - N/2, qRgb(r, g, b));
                 r = g = b = 0;
-            } else {
-                res.setPixel(x - 2, y - 2, img.pixel(x - 2, y - 2));
             }
         }
     }
-
     return res;
 }

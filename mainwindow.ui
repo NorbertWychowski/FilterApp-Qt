@@ -376,7 +376,7 @@ QSlider::sub-page:horizontal {
      <property name="title">
       <string>Rozmycie</string>
      </property>
-     <addaction name="actionSquare"/>
+     <addaction name="actionLowPass"/>
      <addaction name="actionGauss"/>
     </widget>
     <widget class="QMenu" name="menuUwydatnienie">
@@ -409,7 +409,7 @@ QSlider::sub-page:horizontal {
     <string>Laplace</string>
    </property>
   </action>
-  <action name="actionSquare">
+  <action name="actionLowPass">
    <property name="text">
     <string>Uśredniający</string>
    </property>

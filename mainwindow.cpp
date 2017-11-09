@@ -31,11 +31,11 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->actionOpen, SIGNAL(triggered(bool)), this, SLOT(openFileAction()));
     connect(ui->actionSaveAs, SIGNAL(triggered(bool)), this, SLOT(saveFileAction()));
 
-    connect(ui->actionCustomMask, SIGNAL(triggered(bool)), this, SLOT(customMask()));
-    connect(ui->actionLaplace, SIGNAL(triggered(bool)), this, SLOT(laplaceMask()));
-    connect(ui->actionSquare, SIGNAL(triggered(bool)), this, SLOT(squareMask()));
-    connect(ui->actionGauss, SIGNAL(triggered(bool)), this, SLOT(gaussMask()));
-    connect(ui->actionHighPass, SIGNAL(triggered(bool)), this, SLOT(highPassMask()));
+    connect(ui->actionCustomMask, SIGNAL(triggered(bool)), this, SLOT(customFilter()));
+    connect(ui->actionLaplace, SIGNAL(triggered(bool)), this, SLOT(laplaceFilter()));
+    connect(ui->actionLowPass, SIGNAL(triggered(bool)), this, SLOT(lowPassFilter()));
+    connect(ui->actionGauss, SIGNAL(triggered(bool)), this, SLOT(gaussFilter()));
+    connect(ui->actionHighPass, SIGNAL(triggered(bool)), this, SLOT(highPassFilter()));
 
     connect(ui->graphicsView, SIGNAL(zoomChanged(int)), this, SLOT(zoomChanged(int)));
     connect(ui->horizontalSlider, SIGNAL(valueChanged(int)), this, SLOT(sliderChanged(int)));
@@ -73,9 +73,13 @@ void MainWindow::sliderChanged(int value) {
 }
 
 void MainWindow::openFileAction() {
-    QString file = QFileDialog::getOpenFileName(this, tr("Otwórz"), "C://", "All files (*.*);;PNG (*.png)", &QString("PNG (*.png)"));
+    QString file = QFileDialog::getOpenFileName(this, tr("Otwórz"), "C://", tr("Wszystkie pliki (*.*);;"
+                   "JPEG (*.jpg *jpeg);; PNG (*.png)"), &QString(tr("Wszystkie pliki (*.*)")));
 
     image.load(file);
+    if (image.format() != QImage::Format_RGB32)
+        image = image.convertToFormat(QImage::Format_RGB32);
+
     selectTool->resizeSelectedTab();
     selectedAreaItem->setPixmap(QPixmap());
 
@@ -87,56 +91,54 @@ void MainWindow::saveFileAction() {
     image.save(file);
 }
 
-void MainWindow::customMask() {
+void MainWindow::customFilter() {
     dialog = new CustomMaskDialog(this);
-    connect(dialog, SIGNAL(customMask(int*)), this, SLOT(setCustomMask(int*)));
+    connect(dialog, SIGNAL(customMask(Matrix)), this, SLOT(setCustomMask(Matrix)));
 
     dialog->show();
 }
 
-void MainWindow::setCustomMask(int *tab) {
+void MainWindow::setCustomFilter(Matrix matrix) {
     if (ui->selectByColorButton->isChecked())
-        image = filter.splot(image, 5, selectTool->getSelectedTab(), tab);
+        image = filter.splot(image, USER_FILTER, selectTool->getSelectedTab(), matrix);
     else
-        image = filter.splot(image, 5, tab);
-    imageItem->setPixmap(QPixmap::fromImage(image));
-    selectTool->resizeSelectedTab();
-
-    delete[] tab;
-}
-
-void MainWindow::laplaceMask() {
-    if (ui->selectByColorButton->isChecked())
-        image = filter.splot(image, 2, selectTool->getSelectedTab());
-    else
-        image = filter.splot(image, 2);
+        image = filter.splot(image, USER_FILTER, matrix);
     imageItem->setPixmap(QPixmap::fromImage(image));
     selectTool->resizeSelectedTab();
 }
 
-void MainWindow::squareMask() {
+void MainWindow::laplaceFilter() {
     if (ui->selectByColorButton->isChecked())
-        image = filter.splot(image, 1, selectTool->getSelectedTab());
+        image = filter.splot(image, LAPLACE_FILTER, selectTool->getSelectedTab());
     else
-        image = filter.splot(image, 1);
+        image = filter.splot(image, LAPLACE_FILTER);
     imageItem->setPixmap(QPixmap::fromImage(image));
     selectTool->resizeSelectedTab();
 }
 
-void MainWindow::gaussMask() {
+void MainWindow::lowPassFilter() {
     if (ui->selectByColorButton->isChecked())
-        image = filter.splot(image, 3, selectTool->getSelectedTab());
+        image = filter.splot(image, LOWPASS_FILTER, selectTool->getSelectedTab());
     else
-        image = filter.splot(image, 3);
+        image = filter.splot(image, LOWPASS_FILTER);
     imageItem->setPixmap(QPixmap::fromImage(image));
     selectTool->resizeSelectedTab();
 }
 
-void MainWindow::highPassMask() {
+void MainWindow::gaussFilter() {
     if (ui->selectByColorButton->isChecked())
-        image = filter.splot(image, 4, selectTool->getSelectedTab());
+        image = filter.splot(image, GAUSSIAN_FILTER, selectTool->getSelectedTab());
     else
-        image = filter.splot(image, 4);
+        image = filter.splot(image, GAUSSIAN_FILTER);
+    imageItem->setPixmap(QPixmap::fromImage(image));
+    selectTool->resizeSelectedTab();
+}
+
+void MainWindow::highPassFilter() {
+    if (ui->selectByColorButton->isChecked())
+        image = filter.splot(image, HIGHPASS_FILTER, selectTool->getSelectedTab());
+    else
+        image = filter.splot(image, HIGHPASS_FILTER);
     imageItem->setPixmap(QPixmap::fromImage(image));
     selectTool->resizeSelectedTab();
 }
@@ -153,7 +155,7 @@ void MainWindow::mousePressEvent(QMouseEvent *event) {
     if ((event->buttons() & Qt::LeftButton) && ui->selectByColorButton->isChecked()) {
         QPoint local = ui->graphicsView->mapFromGlobal(event->globalPos());
         QPointF l = ui->graphicsView->mapToScene(local);
-        double value = ui->featherSlider->value()/10;
+        double value = ui->featherSlider->value();
         if (ui->featherCheckBox->isChecked() && value != 0) {
             selectedAreaItem->setPixmap(QPixmap::fromImage(selectTool->selectByColor(l.x(), l.y(), ui->thresholdSlider->value(), value)));
         } else {
