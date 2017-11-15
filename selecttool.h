@@ -15,8 +15,6 @@ public:
     QImage selectByColor(int mouse_x, int mouse_y, int threshold);
     QImage selectByColor(int mouse_x, int mouse_y, int threshold, int feather);
 
-    void p();
-
 private:
     int **selectedTab;
     QImage *image;

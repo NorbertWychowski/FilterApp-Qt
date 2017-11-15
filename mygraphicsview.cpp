@@ -3,11 +3,7 @@
 #include <QGuiApplication>
 #include <QWheelEvent>
 
-myGraphicsView::myGraphicsView(QWidget *parent) {
-}
-
-myGraphicsView::myGraphicsView(QGraphicsScene *scene, QWidget *parent) {
-
+myGraphicsView::myGraphicsView(QWidget *parent) : QGraphicsView(parent) {
 }
 
 void myGraphicsView::setZoom(double value) {

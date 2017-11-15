@@ -81,6 +81,9 @@ QImage Filter::splot(QImage &img, FILTER choose, Matrix userKernel) {
 
 QImage Filter::splot(QImage &img, FILTER choose, int ** selectedTab, Matrix userKernel) {
     Matrix kernel;
+    GaussianBlur *blur = nullptr;
+    QImage res;
+
     switch (choose) {
     case LOWPASS_FILTER:
         kernel = convolution.getLowPassKernel();
@@ -92,13 +95,19 @@ QImage Filter::splot(QImage &img, FILTER choose, int ** selectedTab, Matrix user
         kernel = convolution.getHighPassKernel();
         break;
     case GAUSSIAN_FILTER:
-        kernel = convolution.getGaussianKernel(5);
+        blur = new GaussianBlur(img);
+        res =  blur->blur(5), selectedTab;
         break;
     case USER_FILTER:
         kernel = userKernel;
         break;
     default:
         break;
+    }
+
+    if(blur != nullptr) {
+        delete blur;
+        return res;
     }
 
     int N = kernel.getNDimension();
@@ -115,7 +124,7 @@ QImage Filter::splot(QImage &img, FILTER choose, int ** selectedTab, Matrix user
     if (img.format() != QImage::Format_RGB32)
         img = img.convertToFormat(QImage::Format_RGB32);
 
-    QImage res(img.width() - M + 1, img.height() - N + 1, img.format());
+    res = QImage(img.width() - kernel.getMDimension() + 1, img.height() - kernel.getNDimension() + 1, img.format());
 
     for (int y = N/2; y < img.height() - N/2; ++y) {
         for (int x = M/2; x < img.width() - M/2; ++x) {
@@ -140,6 +149,8 @@ QImage Filter::splot(QImage &img, FILTER choose, int ** selectedTab, Matrix user
                 }
                 res.setPixel(x - M/2, y - N/2, qRgb(r, g, b));
                 r = g = b = 0;
+            } else {
+                res.setPixel(x - M/2, y - N/2, img.pixel(x, y));
             }
         }
     }

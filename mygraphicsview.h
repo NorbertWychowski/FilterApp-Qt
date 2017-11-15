@@ -10,15 +10,14 @@ signals:
 
 public:
     myGraphicsView(QWidget * parent = 0);
-    myGraphicsView(QGraphicsScene * scene, QWidget * parent = 0);
 
     void setZoom(double value);
 
-protected slots:
-    void wheelEvent(QWheelEvent *event);
-
 private:
     double zoom = 1;
+
+protected:
+    void wheelEvent(QWheelEvent *event) override;
 };
 
 #endif // MYGRAPHICSVIEW_H

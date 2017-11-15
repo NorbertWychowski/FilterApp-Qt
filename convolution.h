@@ -36,7 +36,6 @@ private:
         { -1,  2, -4,  2, -1 },
         { 0, -1, -1, -1,  0 }
     };
-
 };
 
 #endif // CONVOLUTION_H

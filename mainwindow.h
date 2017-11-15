@@ -7,6 +7,7 @@
 
 #include <QMainWindow>
 #include <QGraphicsScene>
+#include <QStack>
 
 namespace Ui {
 class MainWindow;
@@ -35,11 +36,12 @@ private slots:
 
     void thresholdSliderValueChanged(int);
     void featherSliderValueChanged(int);
-    void mousePressEvent(QMouseEvent *event);
     void selectByColorButtonClicked(bool);
     void featherCheckBoxChanged(bool);
 
 private:
+    void createConnects();
+
     Ui::MainWindow *ui;
 
     QGraphicsScene *scene = nullptr;
@@ -47,8 +49,14 @@ private:
     QGraphicsPixmapItem *selectedAreaItem = nullptr;
     CustomMaskDialog *dialog = nullptr;
     SelectTool *selectTool = nullptr;
+    QStack<QImage> undoStack;
+    QStack<QImage> redoStack;
     QImage image;
     Filter filter;
+
+protected:
+    void mousePressEvent(QMouseEvent *event) override;
+    void keyPressEvent(QKeyEvent *event) override;
 };
 
 #endif // MAINWINDOW_H

@@ -1,7 +1,10 @@
 #ifndef GAUSSIANBLUR_H
 #define GAUSSIANBLUR_H
 
-//https://github.com/mdymel/superfastblur/blob/master/SuperfastBlur/GaussianBlur.cs
+/*
+ * (Super) Fast Gaussian Blur C# Implementation
+ * https://github.com/mdymel/superfastblur/blob/master/SuperfastBlur/GaussianBlur.cs
+ */
 
 #include <QImage>
 
@@ -12,14 +15,12 @@ public:
     GaussianBlur(QImage &image);
     ~GaussianBlur();
 
-    QImage blur(int radius);
+    QImage blur(int radius, int **selectedTab = nullptr);
 
 private:
     void gaussBlur_4(int* source, int* dest, int r);
     int* boxesForGauss(int sigma, int n);
     void boxBlur_4(int* source, int* dest, int w, int h, int r);
-    void boxBlurH_4(int* source, int* dest, int w, int h, int r);
-    void boxBlurT_4(int* source, int* dest, int w, int h, int r);
 
     QRgb* source;
     int* _red;
@@ -32,7 +33,7 @@ private:
 
     int _width;
     int _height;
-    QImage::Format format;
+    QImage image;
 };
 
 #endif // GAUSSIANBLUR_H
