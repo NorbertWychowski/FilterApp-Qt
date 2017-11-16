@@ -29,28 +29,28 @@ SOURCES += \
     mygraphicsview.cpp \
     filter.cpp \
     custommaskdialog.cpp \
-    selecttool.cpp \
     labconverter.cpp \
     convolution.cpp \
     matrix.cpp \
     gaussianblur.cpp \
     boxblur.cpp \
     filtersmenu.cpp \
-    filtergraphicsview.cpp
+    filtergraphicsview.cpp \
+    selectiontool.cpp
 
 HEADERS += \
         mainwindow.h \
     mygraphicsview.h \
     filter.h \
     custommaskdialog.h \
-    selecttool.h \
     labconverter.h \
     convolution.h \
     matrix.h \
     gaussianblur.h \
     boxblur.h \
     filtersmenu.h \
-    filtergraphicsview.h
+    filtergraphicsview.h \
+    selectiontool.h
 
 FORMS += \
         mainwindow.ui \

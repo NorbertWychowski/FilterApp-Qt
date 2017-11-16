@@ -1,4 +1,4 @@
-#include "selecttool.h"
+#include "selectiontool.h"
 #include "labconverter.h"
 #include "gaussianblur.h"
 #include "filter.h"
@@ -8,7 +8,7 @@
 #include <array>
 #include <QtMath>
 
-SelectTool::SelectTool(QImage *image) {
+SelectionTool::SelectionTool(QImage *image) {
     this->image = image;
 
     selectedTab = new int *[image->height()];
@@ -16,23 +16,23 @@ SelectTool::SelectTool(QImage *image) {
         selectedTab[i] = new int[image->width()]();
 }
 
-SelectTool::~SelectTool() {
+SelectionTool::~SelectionTool() {
     for (int i = 0; i<image->height(); i++)
         delete[] selectedTab[i];
     delete[] selectedTab;
 }
 
-void SelectTool::resizeSelectedTab() {
+void SelectionTool::resizeSelectedTab() {
     selectedTab = new int *[image->height()];
     for (int i = 0; i<image->height(); i++)
         selectedTab[i] = new int[image->width()]();
 }
 
-int ** SelectTool::getSelectedTab() {
+int ** SelectionTool::getSelectedTab() {
     return selectedTab;
 }
 
-QImage SelectTool::selectByColor(int mouse_x, int mouse_y, int threshold) {
+QImage SelectionTool::selectByColor(int mouse_x, int mouse_y, int threshold) {
     if (mouse_x < 0 || mouse_y < 0 || mouse_x > image->width() || mouse_y > image->height())
         return QImage();
     QImage selectedArea(image->size(), QImage::Format_ARGB32);
@@ -104,7 +104,7 @@ QImage SelectTool::selectByColor(int mouse_x, int mouse_y, int threshold) {
     return selectedArea;
 }
 
-QImage SelectTool::selectByColor(int mouse_x, int mouse_y, int threshold, int feather) {
+QImage SelectionTool::selectByColor(int mouse_x, int mouse_y, int threshold, int feather) {
     if (mouse_x < 0 || mouse_y < 0 || mouse_x > image->width() || mouse_y > image->height())
         return QImage();
     QImage selectedArea(image->size(), QImage::Format_ARGB32);
@@ -171,6 +171,46 @@ QImage SelectTool::selectByColor(int mouse_x, int mouse_y, int threshold, int fe
                 selectedTab[y1 - 1][x1] = 2;
                 selectedArea.setPixelColor(x1, y1 - 1, Qt::green);
             }
+        }
+    }
+
+    return selectedArea;
+}
+
+QImage SelectionTool::rectangleSelect(QPoint p1, QPoint p2) {
+    QImage selectedArea(image->size(), QImage::Format_ARGB32);
+    selectedArea.fill(qRgba(0, 0, 0, 0));
+
+    if (!(QGuiApplication::keyboardModifiers() & Qt::ControlModifier)) {
+        for (int y = 0; y<image->height(); y++)
+            for (int x = 0; x<image->width(); x++)
+                selectedTab[y][x] = 0;
+    }
+
+    for(int i=p1.x() + 1; i<p2.x() - 1; ++i)
+        for(int j=p1.y() + 1; j<p2.y() - 1; ++j) {
+            selectedTab[j][i] = 1;
+        }
+
+    for(int i=p1.x(); i<p2.x(); ++i) {
+        if(selectedTab[p1.y()][i] == 0) {
+            selectedTab[p1.y()][i] = 2;
+            selectedArea.setPixelColor(i, p1.y(), Qt::green);
+        }
+        if(selectedTab[p2.y()][i] == 0) {
+            selectedTab[p2.y()][i] = 2;
+            selectedArea.setPixelColor(i, p2.y(), Qt::green);
+        }
+    }
+
+    for(int i=p1.y(); i<p2.y(); ++i) {
+        if(selectedTab[i][p1.x()] == 0) {
+            selectedTab[i][p1.x()] = 2;
+            selectedArea.setPixelColor(p1.x(), i, Qt::green);
+        }
+        if(selectedTab[i][p2.x()] == 0) {
+            selectedTab[i][p2.x()] = 2;
+            selectedArea.setPixelColor(p2.x(), i, Qt::green);
         }
     }
 

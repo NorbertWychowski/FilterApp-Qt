@@ -1,23 +1,24 @@
-#ifndef SELECTTOOL_H
-#define SELECTTOOL_H
+#ifndef SELECTIONTOOL_H
+#define SELECTIONTOOL_H
 
 #include <QVector>
 #include <QImage>
 
-class SelectTool {
+class SelectionTool {
 public:
-    SelectTool(QImage *image);
-    ~SelectTool();
+    SelectionTool(QImage *image);
+    ~SelectionTool();
 
     void resizeSelectedTab();
     int ** getSelectedTab();
 
     QImage selectByColor(int mouse_x, int mouse_y, int threshold);
     QImage selectByColor(int mouse_x, int mouse_y, int threshold, int feather);
+    QImage rectangleSelect(QPoint p1, QPoint p2);
 
 private:
     int **selectedTab;
     QImage *image;
 };
 
-#endif // SELECTTOOL_H
+#endif // SELECTIONTOOL_H

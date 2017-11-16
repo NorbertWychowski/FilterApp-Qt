@@ -23,7 +23,7 @@ public:
     ~FiltersMenu();
 
 protected slots:
-    void updateScene(QPointF pos);
+    void updateScene(QPoint pos);
     void resizeEvent(QResizeEvent *);
     void radiusChanged(int radius);
 

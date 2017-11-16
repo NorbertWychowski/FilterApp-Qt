@@ -14,7 +14,8 @@
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
     ui->setupUi(this);
 
-    selectTool = new SelectTool(&image);
+    selectTool = new SelectionTool(&image);
+
 
     ui->featherSlider->setVisible(false);
     ui->featherSlider->setEnabled(false);
@@ -22,6 +23,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
     createConnects();
     initScene();
+    ui->graphicsView->enableRectSelect();
+
 }
 
 MainWindow::~MainWindow() {

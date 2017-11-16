@@ -6,9 +6,6 @@
 #include <QtConcurrent/QtConcurrent>
 #include <QFutureSynchronizer>
 
-
-#include <QDebug>
-
 Filter::Filter() {
 }
 

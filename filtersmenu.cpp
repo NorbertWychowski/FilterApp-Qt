@@ -7,8 +7,6 @@
 #include <QGraphicsPixmapItem>
 #include <QMouseEvent>
 
-#include <QDebug>
-
 FiltersMenu::FiltersMenu(QImage &image, int filter, QWidget *parent) : QDialog(parent), ui(new Ui::FiltersMenu) {
     ui->setupUi(this);
     setAttribute(Qt::WA_DeleteOnClose);
@@ -29,7 +27,7 @@ FiltersMenu::~FiltersMenu() {
     delete ui;
 }
 
-void FiltersMenu::updateScene(QPointF pos) {
+void FiltersMenu::updateScene(QPoint pos) {
     int tmpX = qBound(0, int(x + pos.x()), int(image.width() - width));
     int tmpY = qBound(0, int(y + pos.y()), int(image.height() - height));
 
@@ -73,9 +71,9 @@ void FiltersMenu::radiusChanged(int radius) {
 }
 
 void FiltersMenu::createConnects() {
-    connect(ui->graphicsView, SIGNAL(updatePos(QPointF)), this, SLOT(updateScene(QPointF)));
+    connect(ui->graphicsView, SIGNAL(updatePos(QPoint)), this, SLOT(updateScene(QPoint)));
     connect(ui->radiusSpinBox, SIGNAL(valueChanged(int)), this, SLOT(radiusChanged(int)));
-    connect(ui->graphicsView, QOverload<QPointF>::of(&FilterGraphicsView::mouseRelease), this, [this](QPointF pos) {
+    connect(ui->graphicsView, QOverload<QPoint>::of(&FilterGraphicsView::mouseRelease), this, [this](QPoint pos) {
         x = qBound(0, int(x + pos.x()), int(this->image.width() - width));
         y = qBound(0, int(y + pos.y()), int(this->image.height() - height));
     });

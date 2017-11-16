@@ -1,6 +1,7 @@
 #include "filtergraphicsview.h"
 
 #include <QMouseEvent>
+#include <QGraphicsItem>
 
 FilterGraphicsView::FilterGraphicsView(QWidget *parent) : QGraphicsView(parent) { }
 

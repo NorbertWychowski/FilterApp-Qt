@@ -3,7 +3,7 @@
 
 #include "filter.h"
 #include "custommaskdialog.h"
-#include "selecttool.h"
+#include "selectiontool.h"
 #include "filtersmenu.h"
 
 #include <QMainWindow>
@@ -51,7 +51,7 @@ private:
     QGraphicsPixmapItem *selectedAreaItem = nullptr;
     CustomMaskDialog *dialog = nullptr;
     FiltersMenu *filtersMenu = nullptr;
-    SelectTool *selectTool = nullptr;
+    SelectionTool *selectTool = nullptr;
     QStack<QImage> undoStack;
     QStack<QImage> redoStack;
     QImage image;

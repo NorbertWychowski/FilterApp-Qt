@@ -1,6 +1,5 @@
 #include "custommaskdialog.h"
 #include "ui_custommaskdialog.h"
-#include <QDebug>
 
 CustomMaskDialog::CustomMaskDialog(QWidget *parent) : QDialog(parent), ui(new Ui::CustomMaskDialog) {
     ui->setupUi(this);

@@ -7,8 +7,8 @@ class FilterGraphicsView : public QGraphicsView {
     Q_OBJECT
 
 signals:
-    void updatePos(QPointF pos);
-    void mouseRelease(QPointF pos);
+    void updatePos(QPoint pos);
+    void mouseRelease(QPoint pos);
 
 public:
     FilterGraphicsView(QWidget *parent=0);
@@ -19,7 +19,7 @@ protected:
     void mouseReleaseEvent(QMouseEvent *event) override;
 
 private:
-    QPointF offset;
+    QPoint offset;
 };
 
 #endif // FILTERGRAPHICSVIEW_H
