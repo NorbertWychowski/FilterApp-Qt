@@ -4,6 +4,7 @@
 #include "filter.h"
 #include "custommaskdialog.h"
 #include "selecttool.h"
+#include "filtersmenu.h"
 
 #include <QMainWindow>
 #include <QGraphicsScene>
@@ -41,6 +42,7 @@ private slots:
 
 private:
     void createConnects();
+    void initScene();
 
     Ui::MainWindow *ui;
 
@@ -48,6 +50,7 @@ private:
     QGraphicsPixmapItem *imageItem = nullptr;
     QGraphicsPixmapItem *selectedAreaItem = nullptr;
     CustomMaskDialog *dialog = nullptr;
+    FiltersMenu *filtersMenu = nullptr;
     SelectTool *selectTool = nullptr;
     QStack<QImage> undoStack;
     QStack<QImage> redoStack;

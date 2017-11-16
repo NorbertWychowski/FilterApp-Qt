@@ -1,29 +1,43 @@
 #include "gaussianblur.h"
 
 #include <QtConcurrent/QtConcurrentRun>
-#include <QDebug>
+#include <QFutureSynchronizer>
 
 GaussianBlur::GaussianBlur(QImage &image) {
+    int maxThreads = QThread::idealThreadCount();
+    QFutureSynchronizer<void> futures;
+
     _width = image.width();
     _height = image.height();
-
-    source = new QRgb[_width * _height];
-    for(int i=0; i<image.height(); ++i) {
-        QRgb *t = (QRgb*)image.scanLine(i);
-        for(int j=0; j<_width; ++j)
-            source[i*_width + j] = t[j];
-    }
-
     _red = new int[_width * _height];
     _green = new int[_width * _height];
     _blue = new int[_width * _height];
+    source = new QRgb[_width * _height];
 
-    for(int i=0; i<(_width * _height); ++i) {
-        QRgb col = source[i];
-        _red[i] = qRed(col);
-        _green[i] = qGreen(col);
-        _blue[i] = qBlue(col);
-    }
+    for(int j=0; j<maxThreads; ++j)
+        futures.addFuture(QtConcurrent::run([=] {
+        for (int i = j*_height/maxThreads; i<(j+1)*_height/maxThreads; ++i) {
+            QRgb *t = (QRgb*)image.scanLine(i);
+            for (int j = 0; j<_width; ++j)
+                source[i*_width + j] = t[j];
+        }
+    }));
+
+    futures.waitForFinished();
+    futures.clearFutures();
+
+    for(int j=0; j<maxThreads; ++j)
+        futures.addFuture(QtConcurrent::run([=] {
+        for (int i = j*_width * _height/maxThreads; i<(j+1)*_width * _height/maxThreads; ++i) {
+            QRgb col = source[i];
+            _red[i] = qRed(col);
+            _green[i] = qGreen(col);
+            _blue[i] = qBlue(col);
+        }
+    }));
+
+    futures.waitForFinished();
+    futures.clearFutures();
 
     this->image = image.copy(0, 0, _width, _height);
 }
@@ -40,6 +54,9 @@ GaussianBlur::~GaussianBlur() {
 }
 
 QImage GaussianBlur::blur(int radius, int **selectedTab) {
+    int maxThreads = QThread::idealThreadCount();
+    QFutureSynchronizer<void> futures;
+
     newRed = new int[_width * _height];
     newGreen = new int[_width * _height];
     newBlue = new int[_width * _height];
@@ -49,50 +66,40 @@ QImage GaussianBlur::blur(int radius, int **selectedTab) {
     gaussBlur_4(_green, newGreen, radius);
     gaussBlur_4(_blue, newBlue, radius);
 
-    QList<QFuture<void>> futures;
-    futures.append(QtConcurrent::run([=] (void) {
-        for(int i=0; i<_width * _height; ++i) {
-            if (newRed[i] > 255)        newRed[i] = 255;
-            else if (newRed[i] < 0)     newRed[i] = 0;
-        }
-    }));
-    futures.append(QtConcurrent::run([=] (void) {
-        for(int i=0; i<_width * _height; ++i) {
-            if (newGreen[i] > 255)      newGreen[i] = 255;
-            else if (newGreen[i] < 0)   newGreen[i] = 0;
-        }
-    }));
-    futures.append(QtConcurrent::run([=] (void) {
-        for(int i=0; i<_width * _height; ++i) {
-            if (newBlue[i] > 255)       newBlue[i] = 255;
-            else if (newBlue[i] < 0)    newBlue[i] = 0;
-        }
-    }));
-    futures.append(QtConcurrent::run([=] (void) {
-        int row = 0;
-        if(selectedTab != nullptr) {
-            for(int i=0; i< _height; ++i) {
-                for(int j=0; j<_width; ++j) {
-                    if(selectedTab[i][j] == 1) {
-                        image.setPixel(j, i, qRgb(newRed[row + j], newGreen[row + j], newBlue[row+ j]));
-                    } else {
-                        image.setPixel(j, i, qRgb(_red[row + j], _green[row + j], _blue[row+ j]));
+    auto createImage = [=](int start, int end) {
+        int row = start*_width;
+        if (selectedTab != nullptr) {
+            for (int i = start; i< end; ++i) {
+                for (int j = 0; j<_width; ++j) {
+                    if (selectedTab[i][j] == 1) {
+                        newRed[i] = qBound(0, _red[i], 255);
+                        newGreen[i] = qBound(0, _green[i], 255);
+                        newBlue[i] = qBound(0, _blue[i], 255);
+
+                        image.setPixel(j, i, qRgb(newRed[row + j], newGreen[row + j], newBlue[row + j]));
                     }
                 }
                 row += _width;
             }
         } else {
-            for(int i=0; i< _height; ++i) {
-                for(int j=0; j<_width; ++j)
-                    image.setPixel(j, i, qRgb(newRed[row + j], newGreen[row + j], newBlue[row+ j]));
+            for (int i = start; i< end; ++i) {
+                for (int j = 0; j<_width; ++j) {
+                    newRed[i] = qBound(0, _red[i], 255);
+                    newGreen[i] = qBound(0, _green[i], 255);
+                    newBlue[i] = qBound(0, _blue[i], 255);
+
+                    image.setPixel(j, i, qRgb(newRed[row + j], newGreen[row + j], newBlue[row + j]));
+                }
                 row += _width;
             }
         }
-    }));
+    };
 
-    for(auto future : futures)
-        future.waitForFinished();
-    futures.clear();
+    for (int i = 0; i<maxThreads; ++i)
+        futures.addFuture(QtConcurrent::run(createImage, i*_height / maxThreads, (i + 1)*_height / maxThreads));
+
+    futures.waitForFinished();
+    futures.clearFutures();
 
     return image;
 }
@@ -114,23 +121,38 @@ int *GaussianBlur::boxesForGauss(int sigma, int n) {
     int m = (int)round(mIdeal);
 
     int *sizes = new int[n];
-    for (int i = 0; i < n; i++) sizes[i] = (i < m ? wl : wu);
+    for (int i = 0; i < n; i++) {
+        sizes[i] = (i < m ? wl : wu);
+    }
     return sizes;
 }
 
 void GaussianBlur::boxBlur_4(int *source, int *dest, int w, int h, int r) {
-    for (int i = 0; i < (_width*_height); ++i) dest[i] = source[i];
-
     double iar = 1.0 / (r + r + 1.0);
+    QFutureSynchronizer<void> futures;
+    int maxThreads = QThread::idealThreadCount();
 
-    auto boxBlurH_4 = [&](int start, int end) {
-        for(int i = start; i < end; ++i) {
-            int ti = i * w;
-            int li = ti;
-            int ri = ti + r;
-            int fv = dest[ti];
-            int lv = dest[ti + w - 1];
-            int val = (r + 1) * fv;
+    auto fill = [=](int start, int end) {
+        for(int i=start; i < end; ++i)
+            dest[i] = source[i];
+    };
+
+    for (int i = 0; i<maxThreads; ++i) {
+        futures.addFuture(QtConcurrent::run(fill, h*w*i / maxThreads, h*w*(i + 1) / maxThreads));
+    }
+
+    futures.waitForFinished();
+    futures.clearFutures();
+
+    auto boxBlurH_4 = [=](int start, int end) {
+        int ti, li, ri, fv, lv, val;
+        for (int i = start; i < end; ++i) {
+            ti = i * w;
+            li = ti;
+            ri = ti + r;
+            fv = dest[ti];
+            lv = dest[ti + w - 1];
+            val = (r + 1) * fv;
             for (int j = 0; j < r; ++j) val += dest[ti + j];
             for (int j = 0; j <= r; ++j) {
                 val += dest[ri++] - fv;
@@ -147,19 +169,20 @@ void GaussianBlur::boxBlur_4(int *source, int *dest, int w, int h, int r) {
         }
     };
 
-    auto boxBlurT_4 = [&](int start, int end) {
-        for(int i = start; i < end; ++i) {
-            int ti = i;
-            int li = ti;
-            int ri = ti + r*w;
-            int fv = source[ti];
-            int lv = source[ti + w * (h - 1)];
-            int val = (r + 1) * fv;
-            for(int j=0; j<r; ++j) val += source[ti + j * w];
-            for(int j=0; j<=r; ++j) {
+    auto boxBlurT_4 = [=](int start, int end) {
+        int ti, li, ri, fv, lv, val;
+        for (int i = start; i < end; ++i) {
+            ti = i;
+            li = ti;
+            ri = ti + r*w;
+            fv = source[ti];
+            lv = source[ti + w * (h - 1)];
+            val = (r + 1) * fv;
+            for (int j = 0; j<r; ++j) val += source[ti + j * w];
+            for (int j = 0; j <= r; ++j) {
                 val += source[ri] - fv;
                 dest[ti] = (int)round(val * iar);
-                ri+= w;
+                ri += w;
                 ti += w;
             }
             for (int j = r + 1; j < h - r; ++j) {
@@ -178,22 +201,17 @@ void GaussianBlur::boxBlur_4(int *source, int *dest, int w, int h, int r) {
         }
     };
 
-    QList<QFuture<void>> futures;
-
-    int maxThreads = QThread::idealThreadCount();
-    for(int i=0; i<maxThreads; ++i) {
-        futures.append(QtConcurrent::run(boxBlurH_4, h*i/maxThreads, h*(i+1)/maxThreads));
+    for (int i = 0; i<maxThreads; ++i) {
+        futures.addFuture(QtConcurrent::run(boxBlurH_4, h*i / maxThreads, h*(i + 1) / maxThreads));
     }
 
-    for(auto future : futures)
-        future.waitForFinished();
-    futures.clear();
+    futures.waitForFinished();
+    futures.clearFutures();
 
-    for(int i=0; i<maxThreads; ++i) {
-        futures.append(QtConcurrent::run(boxBlurT_4, w*i/maxThreads,  w*(i+1)/maxThreads));
+    for (int i = 0; i<maxThreads; ++i) {
+        futures.addFuture(QtConcurrent::run(boxBlurT_4, w*i / maxThreads, w*(i + 1) / maxThreads));
     }
 
-    for(auto future : futures)
-        future.waitForFinished();
-    futures.clear();
+    futures.waitForFinished();
+    futures.clearFutures();
 }

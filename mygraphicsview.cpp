@@ -14,7 +14,7 @@ void myGraphicsView::setZoom(double value) {
 void myGraphicsView::wheelEvent(QWheelEvent *event) {
     if (QGuiApplication::keyboardModifiers() & Qt::ControlModifier) {
         int numDegrees = event->delta() / 8;
-        int numSteps = numDegrees / 15; // see QWheelEvent documentation
+        int numSteps = numDegrees / 15;
 
         if (numSteps > 0 && zoom < 5.0) {
             if (zoom <1)

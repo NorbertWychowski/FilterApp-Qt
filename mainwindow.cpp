@@ -1,6 +1,9 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
+#include "gaussianblur.h"
+#include "boxblur.h"
+
 #include <QFileDialog>
 #include <QGraphicsPixmapItem>
 #include <QImage>
@@ -8,20 +11,8 @@
 #include <QKeyEvent>
 #include <QTransform>
 
-#include <QDebug>
-
-MainWindow::MainWindow(QWidget *parent) :
-    QMainWindow(parent),
-    ui(new Ui::MainWindow) {
+MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
     ui->setupUi(this);
-
-    scene = new QGraphicsScene();
-    ui->graphicsView->setScene(scene);
-
-    imageItem = new QGraphicsPixmapItem();
-    selectedAreaItem = new QGraphicsPixmapItem();
-    scene->addItem(imageItem);
-    scene->addItem(selectedAreaItem);
 
     selectTool = new SelectTool(&image);
 
@@ -30,6 +21,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->featherLabel->setVisible(false);
 
     createConnects();
+    initScene();
 }
 
 MainWindow::~MainWindow() {
@@ -114,30 +106,47 @@ void MainWindow::laplaceFilter() {
 }
 
 void MainWindow::lowPassFilter() {
-    undoStack.push(image);
-    redoStack.clear();
-    if (ui->selectByColorButton->isChecked()) {
-        image = filter.splot(image, LOWPASS_FILTER, selectTool->getSelectedTab());
-        selectedAreaItem->setTransform(QTransform().translate(-2.0, -2.0));
-    } else {
-        image = filter.splot(image, LOWPASS_FILTER);
-    }
-    imageItem->setPixmap(QPixmap::fromImage(image));
-    selectTool->resizeSelectedTab();
-}
-#include <ctime>
+    int radius = 0;
 
+    filtersMenu = new FiltersMenu(image, LOWPASS_FILTER, this);
+    filtersMenu->setWindowTitle("Filtr uśredniający");
+
+    connect(filtersMenu, QOverload<int>::of(&FiltersMenu::blurRadius), this, [&](int r) {
+        radius = r;
+
+        undoStack.push(image);
+        redoStack.clear();
+        if (ui->selectByColorButton->isChecked()) {
+            image = filter.splot(image, LOWPASS_FILTER, selectTool->getSelectedTab());
+            selectedAreaItem->setTransform(QTransform().translate(-2.0, -2.0));
+        } else {
+            image = filter.splot(image, LOWPASS_FILTER);
+        }
+        imageItem->setPixmap(QPixmap::fromImage(image));
+        selectTool->resizeSelectedTab();
+    });
+}
+
+#include <QDebug>
 void MainWindow::gaussFilter() {
-    undoStack.push(image);
-    redoStack.clear();
-    if (ui->selectByColorButton->isChecked()) {
-        image = filter.splot(image, GAUSSIAN_FILTER, selectTool->getSelectedTab());
-        selectedAreaItem->setTransform(QTransform().translate(-2.0, -2.0));
-    } else {
-        image = filter.splot(image, GAUSSIAN_FILTER);
-    }
-    imageItem->setPixmap(QPixmap::fromImage(image));
-    selectTool->resizeSelectedTab();
+    int radius = 0;
+
+    filtersMenu = new FiltersMenu(image, GAUSSIAN_FILTER, this);
+    filtersMenu->setWindowTitle("Rozmycie Gaussa");
+
+    connect(filtersMenu, QOverload<int>::of(&FiltersMenu::blurRadius), this, [&](int r) {
+        radius = r;
+
+        undoStack.push(image);
+        redoStack.clear();
+        if (ui->selectByColorButton->isChecked()) {
+            image = GaussianBlur(image).blur(radius, selectTool->getSelectedTab());
+        } else {
+            image = GaussianBlur(image).blur(radius);
+        }
+        imageItem->setPixmap(QPixmap::fromImage(image));
+        selectTool->resizeSelectedTab();
+    });
 }
 
 void MainWindow::highPassFilter() {
@@ -173,7 +182,6 @@ void MainWindow::mousePressEvent(QMouseEvent *event) {
         }
     }
 }
-
 void MainWindow::keyPressEvent(QKeyEvent *event) {
     if((event->key() == Qt::Key_Z) && (QGuiApplication::keyboardModifiers() & Qt::ControlModifier)) {
         if(!undoStack.isEmpty()) {
@@ -181,7 +189,6 @@ void MainWindow::keyPressEvent(QKeyEvent *event) {
             image = undoStack.pop();
             imageItem->setPixmap(QPixmap::fromImage(image));
             selectTool->resizeSelectedTab();
-            qDebug() << undoStack.size() << " " << redoStack.size();
         }
     }
     if((event->key() == Qt::Key_Y) && (QGuiApplication::keyboardModifiers() & Qt::ControlModifier)) {
@@ -222,4 +229,14 @@ void MainWindow::createConnects() {
     connect(ui->featherSlider, SIGNAL(valueChanged(int)), this, SLOT(featherSliderValueChanged(int)));
     connect(ui->selectByColorButton, SIGNAL(clicked(bool)), this, SLOT(selectByColorButtonClicked(bool)));
     connect(ui->featherCheckBox, SIGNAL(clicked(bool)), this, SLOT(featherCheckBoxChanged(bool)));
+}
+
+void MainWindow::initScene() {
+    scene = new QGraphicsScene();
+    ui->graphicsView->setScene(scene);
+
+    imageItem = new QGraphicsPixmapItem();
+    selectedAreaItem = new QGraphicsPixmapItem();
+    scene->addItem(imageItem);
+    scene->addItem(selectedAreaItem);
 }

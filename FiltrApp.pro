@@ -33,7 +33,10 @@ SOURCES += \
     labconverter.cpp \
     convolution.cpp \
     matrix.cpp \
-    gaussianblur.cpp
+    gaussianblur.cpp \
+    boxblur.cpp \
+    filtersmenu.cpp \
+    filtergraphicsview.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -44,8 +47,12 @@ HEADERS += \
     labconverter.h \
     convolution.h \
     matrix.h \
-    gaussianblur.h
+    gaussianblur.h \
+    boxblur.h \
+    filtersmenu.h \
+    filtergraphicsview.h
 
 FORMS += \
         mainwindow.ui \
-    custommaskdialog.ui
+    custommaskdialog.ui \
+    filtersmenu.ui

@@ -9,8 +9,8 @@
 #include <QImage>
 
 class GaussianBlur : public QObject {
-
     Q_OBJECT
+
 public:
     GaussianBlur(QImage &image);
     ~GaussianBlur();

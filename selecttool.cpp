@@ -1,5 +1,6 @@
 #include "selecttool.h"
 #include "labconverter.h"
+#include "gaussianblur.h"
 #include "filter.h"
 
 #include <QGuiApplication>

@@ -2,7 +2,6 @@
 #define FILTR_H
 
 #include "convolution.h"
-#include "gaussianblur.h"
 #include <vector>
 #include <QImage>
 
@@ -20,8 +19,6 @@ public:
 
     QImage splot(QImage &img, FILTER choose, Matrix userKernel = Matrix());
     QImage splot(QImage &img, FILTER choose, int **selectedTab, Matrix userKernel = Matrix());
-
-    double * createGaussianKernel(int N);
 
 private:
     Convolution convolution;

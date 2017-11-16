@@ -26,6 +26,8 @@ private:
     Ui::CustomMaskDialog *ui;
 
     QList<QSpinBox*> spinBoxes;
+
+    void createSpinBoxes();
 };
 
 #endif // CUSTOMMASKDIALOG_H
