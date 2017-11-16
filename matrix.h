@@ -14,6 +14,7 @@ public:
 
     int getNDimension();
     int getMDimension();
+    static double getNorm(Matrix m);
 
     class Row {
         friend class Matrix;

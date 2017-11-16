@@ -1,5 +1,6 @@
 #include "custommaskdialog.h"
 #include "ui_custommaskdialog.h"
+#include <QDebug>
 
 CustomMaskDialog::CustomMaskDialog(QWidget *parent) : QDialog(parent), ui(new Ui::CustomMaskDialog) {
     ui->setupUi(this);
@@ -27,8 +28,12 @@ void CustomMaskDialog::buttonBoxAccepted() {
 
     for (QSpinBox *spinBox : spinBoxes) {
         matrix[i++][j] = spinBox->value();
-        if(i == 5) j++;
+        if(i == 5) {
+            j++;
+            i = 0;
+        }
     }
+
     emit customMask(matrix);
 }
 

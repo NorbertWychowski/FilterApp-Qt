@@ -65,6 +65,7 @@ void MainWindow::openFileAction() {
     selectedAreaItem->setPixmap(QPixmap());
 
     imageItem->setPixmap(QPixmap::fromImage(image));
+    scene->setSceneRect(image.rect());
 }
 
 void MainWindow::saveFileAction() {
@@ -74,12 +75,14 @@ void MainWindow::saveFileAction() {
 
 void MainWindow::customFilter() {
     dialog = new CustomMaskDialog(this);
-    connect(dialog, SIGNAL(customMask(Matrix)), this, SLOT(setCustomMask(Matrix)));
+    connect(dialog, SIGNAL(customMask(Matrix)), this, SLOT(setCustomFilter(Matrix)));
 
     dialog->show();
 }
 
 void MainWindow::setCustomFilter(Matrix matrix) {
+    QApplication::setOverrideCursor(Qt::BusyCursor);
+
     undoStack.push(image);
     redoStack.clear();
     if (ui->selectByColorButton->isChecked()) {
@@ -90,9 +93,13 @@ void MainWindow::setCustomFilter(Matrix matrix) {
     }
     imageItem->setPixmap(QPixmap::fromImage(image));
     selectTool->resizeSelectedTab();
+
+    QApplication::setOverrideCursor(Qt::ArrowCursor);
 }
 
 void MainWindow::laplaceFilter() {
+    QApplication::setOverrideCursor(Qt::BusyCursor);
+
     undoStack.push(image);
     redoStack.clear();
     if (ui->selectByColorButton->isChecked()) {
@@ -103,6 +110,8 @@ void MainWindow::laplaceFilter() {
     }
     imageItem->setPixmap(QPixmap::fromImage(image));
     selectTool->resizeSelectedTab();
+
+    QApplication::setOverrideCursor(Qt::ArrowCursor);
 }
 
 void MainWindow::lowPassFilter() {
@@ -112,6 +121,7 @@ void MainWindow::lowPassFilter() {
     filtersMenu->setWindowTitle("Filtr uśredniający");
 
     connect(filtersMenu, QOverload<int>::of(&FiltersMenu::blurRadius), this, [&](int r) {
+        QApplication::setOverrideCursor(Qt::BusyCursor);
         radius = r;
 
         undoStack.push(image);
@@ -124,10 +134,11 @@ void MainWindow::lowPassFilter() {
         }
         imageItem->setPixmap(QPixmap::fromImage(image));
         selectTool->resizeSelectedTab();
+
+        QApplication::setOverrideCursor(Qt::ArrowCursor);
     });
 }
 
-#include <QDebug>
 void MainWindow::gaussFilter() {
     int radius = 0;
 
@@ -135,6 +146,7 @@ void MainWindow::gaussFilter() {
     filtersMenu->setWindowTitle("Rozmycie Gaussa");
 
     connect(filtersMenu, QOverload<int>::of(&FiltersMenu::blurRadius), this, [&](int r) {
+        QApplication::setOverrideCursor(Qt::BusyCursor);
         radius = r;
 
         undoStack.push(image);
@@ -146,10 +158,14 @@ void MainWindow::gaussFilter() {
         }
         imageItem->setPixmap(QPixmap::fromImage(image));
         selectTool->resizeSelectedTab();
+
+        QApplication::setOverrideCursor(Qt::ArrowCursor);
     });
 }
 
 void MainWindow::highPassFilter() {
+    QApplication::setOverrideCursor(Qt::BusyCursor);
+
     undoStack.push(image);
     redoStack.clear();
     if (ui->selectByColorButton->isChecked()) {
@@ -160,6 +176,8 @@ void MainWindow::highPassFilter() {
     }
     imageItem->setPixmap(QPixmap::fromImage(image));
     selectTool->resizeSelectedTab();
+
+    QApplication::setOverrideCursor(Qt::ArrowCursor);
 }
 
 void MainWindow::thresholdSliderValueChanged(int value) {
@@ -175,11 +193,16 @@ void MainWindow::mousePressEvent(QMouseEvent *event) {
         QPoint local = ui->graphicsView->mapFromGlobal(event->globalPos());
         QPointF l = ui->graphicsView->mapToScene(local);
         double value = ui->featherSlider->value();
+
+        QApplication::setOverrideCursor(Qt::BusyCursor);
+
         if (ui->featherCheckBox->isChecked() && value != 0) {
             selectedAreaItem->setPixmap(QPixmap::fromImage(selectTool->selectByColor(l.x(), l.y(), ui->thresholdSlider->value(), value)));
         } else {
             selectedAreaItem->setPixmap(QPixmap::fromImage(selectTool->selectByColor(l.x(), l.y(), ui->thresholdSlider->value())));
         }
+
+        QApplication::setOverrideCursor(Qt::ArrowCursor);
     }
 }
 void MainWindow::keyPressEvent(QKeyEvent *event) {

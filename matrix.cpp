@@ -54,6 +54,16 @@ int Matrix::getMDimension() {
     return M;
 }
 
+double Matrix::getNorm(Matrix m) {
+    int N = m.getNDimension();
+    int M = m.getMDimension();
+    double norm = 0;
+    for(int i=0; i<N; ++i)
+        for(int j=0; j<M; ++j)
+            norm += m[i][j];
+    return norm;
+}
+
 Matrix::Row Matrix::operator[](int row) {
     return Row(*this, row);
 }
