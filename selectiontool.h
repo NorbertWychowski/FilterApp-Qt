@@ -10,15 +10,16 @@ public:
     ~SelectionTool();
 
     void resizeSelectedTab();
-    int ** getSelectedTab();
+    __int8 ** getSelectedTab();
 
     QImage selectByColor(int mouse_x, int mouse_y, int threshold);
     QImage selectByColor(int mouse_x, int mouse_y, int threshold, int feather);
-    QImage rectangleSelect(QPoint p1, QPoint p2);
+    QImage rectangleSelect(QRect rectSelect);
 
 private:
-    int **selectedTab;
+    __int8 **selectedTab;
     QImage *image;
+    QImage selectedArea;
 };
 
 #endif // SELECTIONTOOL_H

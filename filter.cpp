@@ -94,7 +94,7 @@ QImage Filter::splot(QImage &img, FILTER choose, Matrix userKernel) {
     return res;
 }
 
-QImage Filter::splot(QImage &img, FILTER choose, int ** selectedTab, Matrix userKernel) {
+QImage Filter::splot(QImage &img, FILTER choose, __int8 ** selectedTab, Matrix userKernel) {
     Matrix kernel;
     QImage res;
     GaussianBlur *gaussianBlur = nullptr;

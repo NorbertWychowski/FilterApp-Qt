@@ -15,7 +15,7 @@ public:
     GaussianBlur(QImage &image);
     ~GaussianBlur();
 
-    QImage blur(int radius, int **selectedTab = nullptr);
+    QImage blur(int radius, __int8 **selectedTab = nullptr);
 
 private:
     void gaussBlur_4(int* source, int* dest, int r);

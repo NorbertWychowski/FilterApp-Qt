@@ -4,25 +4,22 @@
 #include <QWheelEvent>
 #include <QGraphicsRectItem>
 
-#include <QDebug>
 
 myGraphicsView::myGraphicsView(QWidget *parent) : QGraphicsView(parent) {
     isRectSelect = false;
 }
 
-void myGraphicsView::setZoom(double value) {
-    resetMatrix();
-    scale(value, value);
-}
-
 void myGraphicsView::enableRectSelect() {
     this->isRectSelect = true;
-    rectItem = scene()->addRect(rectSelect, QPen(Qt::darkGreen));
 }
 
 void myGraphicsView::disableRectSelect() {
     this->isRectSelect = false;
-    scene()->removeItem((QGraphicsItem*)rectItem);
+}
+
+void myGraphicsView::setZoom(double value) {
+    resetMatrix();
+    scale(value, value);
 }
 
 void myGraphicsView::wheelEvent(QWheelEvent *event) {
@@ -55,23 +52,36 @@ void myGraphicsView::wheelEvent(QWheelEvent *event) {
 }
 
 void myGraphicsView::mousePressEvent(QMouseEvent *event) {
-    offset = event->pos();
+    QPoint local = mapFromGlobal(event->globalPos());
+    QPointF l = mapToScene(local);
+
+    offset = l.toPoint();
+
+    if(event->buttons() & Qt::LeftButton) {
+        rectItem = scene()->addRect(QRect(l.x(), l.y(), 0, 0), QPen(Qt::green));
+    }
+
+    event->ignore();
 }
 
 void myGraphicsView::mouseMoveEvent(QMouseEvent *event) {
+    QPoint local = mapFromGlobal(event->globalPos());
+    QPointF l = mapToScene(local);
+
     if(isRectSelect) {
         if(event->buttons() & Qt::LeftButton) {
-            int x1 = offset.x() < event->pos().x() ? offset.x() : event->pos().x();
-            int y1 = offset.y() < event->pos().y() ? offset.y() : event->pos().y();
-            int x2 = offset.x() > event->pos().x() ? offset.x() : event->pos().x();
-            int y2 = offset.y() > event->pos().y() ? offset.y() : event->pos().y();
-            rectItem->setRect(QRect(QPoint(x1, y1), QPoint(x2, y2)));
+            rectItem->setRect(QRect(QPoint(offset.x(), offset.y()),
+                                    QPoint(l.x(), l.y())).normalized());
         }
     }
 }
-
+#include <QDebug>
 void myGraphicsView::mouseReleaseEvent(QMouseEvent *event) {
-
+    if(event->button() & Qt::LeftButton) {
+        if(isRectSelect) {
+            if(!rectItem->rect().isNull())
+                emit rectSelected(rectItem->rect().toRect());
+            scene()->removeItem((QGraphicsItem*)rectItem);
+        }
+    }
 }
-
-

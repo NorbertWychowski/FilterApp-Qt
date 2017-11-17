@@ -37,14 +37,12 @@ private slots:
 
     void thresholdSliderValueChanged(int);
     void featherSliderValueChanged(int);
-    void selectByColorButtonClicked(bool);
     void featherCheckBoxChanged(bool);
 
 private:
-    void createConnects();
-    void initScene();
-
     Ui::MainWindow *ui;
+
+    bool isSelectMask;
 
     QGraphicsScene *scene = nullptr;
     QGraphicsPixmapItem *imageItem = nullptr;
@@ -56,6 +54,9 @@ private:
     QStack<QImage> redoStack;
     QImage image;
     Filter filter;
+
+    void createConnects();
+    void initScene();
 
 protected:
     void mousePressEvent(QMouseEvent *event) override;

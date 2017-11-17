@@ -53,7 +53,7 @@ GaussianBlur::~GaussianBlur() {
     delete[] _blue;
 }
 
-QImage GaussianBlur::blur(int radius, int **selectedTab) {
+QImage GaussianBlur::blur(int radius, __int8 **selectedTab) {
     int maxThreads = QThread::idealThreadCount();
     QFutureSynchronizer<void> futures;
 
