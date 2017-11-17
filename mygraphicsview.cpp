@@ -3,6 +3,7 @@
 #include <QGuiApplication>
 #include <QWheelEvent>
 #include <QGraphicsRectItem>
+#include <QGraphicsView>
 
 
 myGraphicsView::myGraphicsView(QWidget *parent) : QGraphicsView(parent) {

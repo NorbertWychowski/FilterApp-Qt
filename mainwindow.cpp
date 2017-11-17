@@ -252,24 +252,32 @@ void MainWindow::createConnects() {
     connect(ui->featherCheckBox,    SIGNAL(clicked(bool)),      this, SLOT(featherCheckBoxChanged(bool)));
 
     connect(ui->selectByColorButton, &QPushButton::clicked,     this, [this](bool b) {
-        if (b) {
-            isSelectMask = true;
-        } else {
-            selectedAreaItem->setPixmap(QPixmap());
-            isSelectMask = false;
-        }
         ui->toolsOptions->setVisible(b);
         ui->toolsOptions->setEnabled(b);
+
+        selectedAreaItem->setPixmap(QPixmap());
+
+        if (!b) {
+            isSelectMask = false;
+        }
+        if(ui->rectangleSelectButton->isChecked())
+            ui->rectangleSelectButton->setChecked(false);
     });
 
     connect(ui->rectangleSelectButton, &QPushButton::clicked,   this, [this](bool b) {
+        ui->toolsOptions->setVisible(false);
+        ui->toolsOptions->setEnabled(false);
+
+        selectedAreaItem->setPixmap(QPixmap());
+
         if (b) {
             ui->graphicsView->enableRectSelect();
         } else {
             ui->graphicsView->disableRectSelect();
-            selectedAreaItem->setPixmap(QPixmap());
             isSelectMask = false;
         }
+        if(ui->selectByColorButton->isChecked())
+            ui->selectByColorButton->setChecked(false);
     });
 
     connect(ui->graphicsView, &myGraphicsView::rectSelected,    this, [this](QRect selectRect) {
