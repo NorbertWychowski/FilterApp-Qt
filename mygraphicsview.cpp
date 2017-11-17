@@ -58,7 +58,7 @@ void myGraphicsView::mousePressEvent(QMouseEvent *event) {
 
     offset = l.toPoint();
 
-    if(event->buttons() & Qt::LeftButton) {
+    if(event->buttons() & Qt::LeftButton && isRectSelect) {
         rectItem = scene()->addRect(QRect(l.x(), l.y(), 0, 0), QPen(Qt::green));
     }
 
