@@ -3,7 +3,8 @@
 
 #include <QDialog>
 #include <QSpinBox>
-#include "matrix.h"
+
+#include "filters/math/matrix.h"
 
 namespace Ui {
 class CustomMaskDialog;

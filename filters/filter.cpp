@@ -1,6 +1,6 @@
 #include "filter.h"
 #include "gaussianblur.h"
-#include <boxblur.h>
+#include "boxblur.h"
 
 #include <QtMath>
 #include <QtConcurrent/QtConcurrent>

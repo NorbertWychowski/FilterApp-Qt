@@ -1,8 +1,8 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
-#include "gaussianblur.h"
-#include "boxblur.h"
+#include "filters/gaussianblur.h"
+#include "filters/boxblur.h"
 
 #include <QFileDialog>
 #include <QGraphicsPixmapItem>

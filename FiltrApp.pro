@@ -23,34 +23,36 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 
+VPATH += /filters/
+
 SOURCES += \
         main.cpp \
         mainwindow.cpp \
     mygraphicsview.cpp \
-    filter.cpp \
     custommaskdialog.cpp \
-    labconverter.cpp \
-    convolution.cpp \
-    matrix.cpp \
-    gaussianblur.cpp \
-    boxblur.cpp \
     filtersmenu.cpp \
     filtergraphicsview.cpp \
-    selectiontool.cpp
+    selectiontool.cpp \
+    filters/filter.cpp \
+    filters/boxblur.cpp \
+    filters/gaussianblur.cpp \
+    filters/math/convolution.cpp \
+    filters/math/labconverter.cpp \
+    filters/math/matrix.cpp
 
 HEADERS += \
         mainwindow.h \
     mygraphicsview.h \
-    filter.h \
     custommaskdialog.h \
-    labconverter.h \
-    convolution.h \
-    matrix.h \
-    gaussianblur.h \
-    boxblur.h \
     filtersmenu.h \
     filtergraphicsview.h \
-    selectiontool.h
+    selectiontool.h \
+    filters/filter.h \
+    filters/boxblur.h \
+    filters/gaussianblur.h \
+    filters/math/convolution.h \
+    filters/math/labconverter.h \
+    filters/math/matrix.h
 
 FORMS += \
         mainwindow.ui \

@@ -1,7 +1,7 @@
 #ifndef CONVOLUTION_H
 #define CONVOLUTION_H
 
-#include <matrix.h>
+#include "matrix.h"
 
 
 class Convolution {

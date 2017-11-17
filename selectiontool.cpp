@@ -1,7 +1,8 @@
 #include "selectiontool.h"
-#include "labconverter.h"
-#include "gaussianblur.h"
-#include "filter.h"
+
+#include "filters/gaussianblur.h"
+#include "filters/filter.h"
+#include "filters/math/labconverter.h"
 
 #include <QGuiApplication>
 #include <QQueue>

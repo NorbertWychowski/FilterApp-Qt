@@ -1,7 +1,7 @@
-#ifndef FILTR_H
-#define FILTR_H
+#ifndef FILTER_H
+#define FILTER_H
 
-#include "convolution.h"
+#include "math/convolution.h"
 #include <vector>
 #include <QImage>
 
@@ -25,4 +25,4 @@ private:
 
 };
 
-#endif // FILTR_H
+#endif // FILTER_H

@@ -1,7 +1,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include "filter.h"
+#include "filters/filter.h"
 #include "custommaskdialog.h"
 #include "selectiontool.h"
 #include "filtersmenu.h"

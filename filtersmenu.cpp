@@ -1,8 +1,8 @@
 #include "filtersmenu.h"
 #include "ui_filtersmenu.h"
 
-#include "gaussianblur.h"
-#include "boxblur.h"
+#include "filters/gaussianblur.h"
+#include "filters/boxblur.h"
 
 #include <QGraphicsPixmapItem>
 #include <QMouseEvent>
