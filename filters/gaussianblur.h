@@ -19,7 +19,7 @@ public:
 
 private:
     void gaussBlur_4(int* source, int* dest, int r);
-    int* boxesForGauss(int sigma, int n);
+    int* boxesForGauss(double sigma, int n);
     void boxBlur_4(int* source, int* dest, int w, int h, int r);
 
     QRgb* source;

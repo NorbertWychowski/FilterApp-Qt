@@ -2,6 +2,7 @@
 
 #include <QtConcurrent/QtConcurrentRun>
 #include <QFutureSynchronizer>
+#include <QtMath>
 
 GaussianBlur::GaussianBlur(QImage &image) {
     int maxThreads = QThread::idealThreadCount();
@@ -105,13 +106,13 @@ QImage GaussianBlur::blur(int radius, __int8 **selectedTab) {
 }
 
 void GaussianBlur::gaussBlur_4(int *source, int *dest, int r) {
-    int *bxs = boxesForGauss(r, 3);
+    int *bxs = boxesForGauss(qSqrt(-(r * r) / (2.0 * log(1.0 / 255.0))), 3);
     boxBlur_4(source, dest, _width, _height, (bxs[0] - 1) / 2);
     boxBlur_4(dest, source, _width, _height, (bxs[1] - 1) / 2);
     boxBlur_4(source, dest, _width, _height, (bxs[2] - 1) / 2);
 }
 
-int *GaussianBlur::boxesForGauss(int sigma, int n) {
+int *GaussianBlur::boxesForGauss(double sigma, int n) {
     double wIdeal = sqrt((12 * sigma * sigma / n) + 1);
     int wl = (int)floor(wIdeal);
     if (wl % 2 == 0) wl--;
