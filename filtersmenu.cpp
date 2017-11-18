@@ -6,6 +6,7 @@
 
 #include <QGraphicsPixmapItem>
 #include <QMouseEvent>
+#include <QTimer>
 
 FiltersMenu::FiltersMenu(QImage &image, int filter, QWidget *parent) : QDialog(parent), ui(new Ui::FiltersMenu) {
     ui->setupUi(this);
@@ -13,6 +14,8 @@ FiltersMenu::FiltersMenu(QImage &image, int filter, QWidget *parent) : QDialog(p
 
     this->filter = filter;
     this->image = image;
+
+    timer = new QTimer(this);
 
     createConnects();
     initScene();
@@ -59,26 +62,23 @@ void FiltersMenu::resizeEvent(QResizeEvent *) {
     }
 }
 
-void FiltersMenu::radiusChanged(int radius) {
-    switch(filter) {
-    case 1:
-        blurredItem->setPixmap(QPixmap::fromImage(GaussianBlur(image.copy(x, y, width, height)).blur(radius)));
-        break;
-    case 2:
-        blurredItem->setPixmap(QPixmap::fromImage(BoxBlur(image.copy(x, y, width, height)).blur(radius)));
-        break;
-    }
-}
-
 void FiltersMenu::createConnects() {
-    connect(ui->graphicsView, SIGNAL(updatePos(QPoint)), this, SLOT(updateScene(QPoint)));
-    connect(ui->radiusSpinBox, SIGNAL(valueChanged(int)), this, SLOT(radiusChanged(int)));
-    connect(ui->graphicsView, QOverload<QPoint>::of(&FilterGraphicsView::mouseRelease), this, [this](QPoint pos) {
+    connect(ui->graphicsView,   SIGNAL(updatePos(QPoint)),  this, SLOT(updateScene(QPoint)));
+
+    connect(ui->graphicsView, &FilterGraphicsView::mouseRelease, this, [this](QPoint pos) {
         x = qBound(0, int(x + pos.x()), int(this->image.width() - width));
         y = qBound(0, int(y + pos.y()), int(this->image.height() - height));
     });
-    connect(this, QOverload<void>::of(&FiltersMenu::accepted), this, [this](void) {
+    connect(this, &FiltersMenu::accepted, this, [this](void) {
         emit blurRadius(ui->radiusSpinBox->value());
+    });
+    //zmiana promienia rozmycia
+    connect(ui->radiusSpinBox, QOverload<int>::of(&QSpinBox::valueChanged),  this, [this](void) {
+        timer->start(400);
+    });
+    //po 0.4 s zmiana podgladu
+    connect(timer, &QTimer::timeout, this, [this](void) {
+        radiusChanged(ui->radiusSpinBox->value());
     });
 }
 
@@ -101,6 +101,17 @@ void FiltersMenu::initScene() {
         break;
     case 2:
         blurredItem->setPixmap(QPixmap::fromImage(BoxBlur(image.copy(x, y, width, height)).blur(ui->radiusSpinBox->value())));
+        break;
+    }
+}
+
+void FiltersMenu::radiusChanged(int radius) {
+    switch(filter) {
+    case 1:
+        blurredItem->setPixmap(QPixmap::fromImage(GaussianBlur(image.copy(x, y, width, height)).blur(radius)));
+        break;
+    case 2:
+        blurredItem->setPixmap(QPixmap::fromImage(BoxBlur(image.copy(x, y, width, height)).blur(radius)));
         break;
     }
 }

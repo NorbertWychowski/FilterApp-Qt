@@ -22,10 +22,8 @@ public:
     explicit FiltersMenu(QImage &image, int filter, QWidget *parent = 0);
     ~FiltersMenu();
 
-protected slots:
     void updateScene(QPoint pos);
     void resizeEvent(QResizeEvent *);
-    void radiusChanged(int radius);
 
 private:
     Ui::FiltersMenu *ui;
@@ -39,9 +37,11 @@ private:
     QGraphicsScene *scene;
     QGraphicsPixmapItem *backgroundItem;
     QGraphicsPixmapItem *blurredItem;
+    QTimer *timer;
 
     void createConnects();
     void initScene();
+    void radiusChanged(int radius);
 };
 
 #endif // FILTERSMENU_H
