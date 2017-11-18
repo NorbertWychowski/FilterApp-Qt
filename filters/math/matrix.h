@@ -15,6 +15,8 @@ public:
     int getNDimension();
     int getMDimension();
     static double getNorm(Matrix m);
+    static Matrix getLaplaceKernel();
+    static Matrix getHighPassKernel();
 
     class Row {
         friend class Matrix;
@@ -33,6 +35,9 @@ public:
 private:
     int N, M;
     double **matrix = nullptr;
+
+    static const Matrix laplaceKernel;
+    static const Matrix highPassKernel;
 };
 
 #endif // MATRIX_H

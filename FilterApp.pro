@@ -36,7 +36,6 @@ SOURCES += \
     filters/filter.cpp \
     filters/boxblur.cpp \
     filters/gaussianblur.cpp \
-    filters/math/convolution.cpp \
     filters/math/labconverter.cpp \
     filters/math/matrix.cpp
 
@@ -50,7 +49,6 @@ HEADERS += \
     filters/filter.h \
     filters/boxblur.h \
     filters/gaussianblur.h \
-    filters/math/convolution.h \
     filters/math/labconverter.h \
     filters/math/matrix.h
 

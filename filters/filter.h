@@ -1,7 +1,7 @@
 #ifndef FILTER_H
 #define FILTER_H
 
-#include "math/convolution.h"
+#include "math/matrix.h"
 #include <vector>
 #include <QImage>
 
@@ -19,9 +19,6 @@ public:
 
     QImage splot(QImage &img, FILTER choose, Matrix userKernel = Matrix());
     QImage splot(QImage &img, FILTER choose, __int8 **selectedTab, Matrix userKernel = Matrix());
-
-private:
-    Convolution convolution;
 
 };
 

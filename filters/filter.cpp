@@ -23,10 +23,10 @@ QImage Filter::splot(QImage &img, FILTER choose, Matrix userKernel) {
         return res;
         break;
     case LAPLACE_FILTER:
-        kernel = convolution.getLaplaceKernel();
+        kernel = Matrix::getLaplaceKernel();
         break;
     case HIGHPASS_FILTER:
-        kernel = convolution.getHighPassKernel();
+        kernel = Matrix::getHighPassKernel();
         break;
     case GAUSSIAN_FILTER:
         gaussianBlur = new GaussianBlur(img);
@@ -108,10 +108,10 @@ QImage Filter::splot(QImage &img, FILTER choose, __int8 ** selectedTab, Matrix u
         return res;
         break;
     case LAPLACE_FILTER:
-        kernel = convolution.getLaplaceKernel();
+        kernel = Matrix::getLaplaceKernel();
         break;
     case HIGHPASS_FILTER:
-        kernel = convolution.getHighPassKernel();
+        kernel = Matrix::getHighPassKernel();
         break;
     case GAUSSIAN_FILTER:
         gaussianBlur = new GaussianBlur(img);
