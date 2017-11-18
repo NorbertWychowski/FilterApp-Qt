@@ -114,12 +114,13 @@ QImage SelectionTool::selectByColor(int mouse_x, int mouse_y, int threshold) {
 
     return selectedArea;
 }
-
+#include <QPainter>
 QImage SelectionTool::selectByColor(int mouse_x, int mouse_y, int threshold, int feather) {
     if (mouse_x < 0 || mouse_y < 0 || mouse_x > image->width() || mouse_y > image->height())
         return QImage();
 
-    QImage tmp = GaussianBlur(*image).blur(feather);
+    QImage tmp = *image;
+    QPainter painter(&tmp);
 
     if (!(QGuiApplication::keyboardModifiers() & Qt::ControlModifier)) {
         for (int y = 0; y<image->height(); y++)
@@ -135,6 +136,10 @@ QImage SelectionTool::selectByColor(int mouse_x, int mouse_y, int threshold, int
     int width = image->width();
     int height = image->height();
 
+    bool blurTab[6][6]  = { false };
+    float blurTabWidth  = width / 6.0;
+    float blurTabHeight = height / 6.0;
+
     QQueue<std::array<int, 2>> queue;
     queue.push_back({ x1, y1 });
     selectedTab[y1][x1] = true;
@@ -145,6 +150,15 @@ QImage SelectionTool::selectByColor(int mouse_x, int mouse_y, int threshold, int
         queue.pop_front();
 
         if (x1 + 1 < width && selectedTab[y1][x1 + 1] != 1) {
+            int i = (x1 + 1) / blurTabWidth;
+            int j = y1 / blurTabHeight;
+            if(!blurTab[i][j]) {
+                painter.drawImage(i * blurTabWidth, j * blurTabHeight,
+                                  GaussianBlur(image->copy(i * blurTabWidth, j * blurTabHeight,
+                                               blurTabWidth, blurTabHeight)).blur(feather));
+                blurTab[i][j] = true;
+            }
+
             color = tmp.pixelColor(x1 + 1, y1);
             if (LabConverter::compareColors(baseColor, color) < threshold) {
                 queue.push_back({ x1 + 1, y1 });
@@ -156,6 +170,15 @@ QImage SelectionTool::selectByColor(int mouse_x, int mouse_y, int threshold, int
             }
         }
         if ((x1 > 0) && selectedTab[y1][x1 - 1] != 1) {
+            int i = (x1 - 1) / blurTabWidth;
+            int j = y1 / blurTabHeight;
+            if(!blurTab[i][j]) {
+                painter.drawImage(i * blurTabWidth, j * blurTabHeight,
+                                  GaussianBlur(image->copy(i * blurTabWidth, j * blurTabHeight,
+                                               blurTabWidth, blurTabHeight)).blur(feather));
+                blurTab[i][j] = true;
+            }
+
             color = tmp.pixelColor(x1 - 1, y1);
             if (LabConverter::compareColors(baseColor, color) < threshold) {
                 queue.push_back({ x1 - 1, y1 });
@@ -167,6 +190,15 @@ QImage SelectionTool::selectByColor(int mouse_x, int mouse_y, int threshold, int
             }
         }
         if ((y1 + 1 <  height) && selectedTab[y1 + 1][x1] != 1) {
+            int i = x1 / blurTabWidth;
+            int j = (y1 + 1) / blurTabHeight;
+            if(!blurTab[i][j]) {
+                painter.drawImage(i * blurTabWidth, j * blurTabHeight,
+                                  GaussianBlur(image->copy(i * blurTabWidth, j * blurTabHeight,
+                                               blurTabWidth, blurTabHeight)).blur(feather));
+                blurTab[i][j] = true;
+            }
+
             color = tmp.pixelColor(x1, y1 + 1);
             if (LabConverter::compareColors(baseColor, color) < threshold) {
                 queue.push_back({ x1, y1 + 1 });
@@ -178,6 +210,15 @@ QImage SelectionTool::selectByColor(int mouse_x, int mouse_y, int threshold, int
             }
         }
         if ((y1 > 0) && selectedTab[y1 - 1][x1] != 1) {
+            int i = x1 / blurTabWidth;
+            int j = (y1 - 1) / blurTabHeight;
+            if(!blurTab[i][j]) {
+                painter.drawImage(i * blurTabWidth, j * blurTabHeight,
+                                  GaussianBlur(image->copy(i * blurTabWidth, j * blurTabHeight,
+                                               blurTabWidth, blurTabHeight)).blur(feather));
+                blurTab[i][j] = true;
+            }
+
             color = tmp.pixelColor(x1, y1 - 1);
             if (LabConverter::compareColors(baseColor, color) < threshold) {
                 queue.push_back({ x1, y1 - 1 });
