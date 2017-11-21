@@ -129,9 +129,8 @@ QImage SelectionTool::selectByColor(int mouse_x, int mouse_y, int threshold, int
             int i = (x1 + 1) / blurTabWidth;
             int j = y1 / blurTabHeight;
             if(!blurTab[i][j]) {
-                painter.drawImage(i * blurTabWidth, j * blurTabHeight,
-                                  GaussianBlur(image->copy(i * blurTabWidth, j * blurTabHeight,
-                                               blurTabWidth, blurTabHeight)).blur(feather));
+                QImage tmp = image->copy(i * blurTabWidth, j * blurTabHeight, blurTabWidth, blurTabHeight);
+                painter.drawImage(i * blurTabWidth, j * blurTabHeight, GaussianBlur(tmp).blur(feather));
                 blurTab[i][j] = true;
             }
 

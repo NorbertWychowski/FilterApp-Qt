@@ -20,6 +20,7 @@ protected:
 
 private:
     QPoint offset;
+
 };
 
 #endif // FILTERGRAPHICSVIEW_H

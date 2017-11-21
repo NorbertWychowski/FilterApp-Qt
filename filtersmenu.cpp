@@ -48,6 +48,24 @@ void FiltersMenu::updateScene(QPoint pos) {
     }
 }
 
+void FiltersMenu::mouseReleased(QPoint pos) {
+    x = qBound(0, int(x + pos.x()), int(this->image.width() - width));
+    y = qBound(0, int(y + pos.y()), int(this->image.height() - height));
+}
+
+void FiltersMenu::blurRadiusSelected() {
+    emit blurRadius(ui->radiusSpinBox->value());
+}
+
+void FiltersMenu::waitWithPreviewBlur() {
+    timer->start(400);
+}
+
+void FiltersMenu::blurPreview() {
+    radiusChanged(ui->radiusSpinBox->value());
+    timer->stop();
+}
+
 void FiltersMenu::resizeEvent(QResizeEvent *) {
     width = ui->graphicsView->width();
     height = ui->graphicsView->height();
@@ -63,24 +81,14 @@ void FiltersMenu::resizeEvent(QResizeEvent *) {
 }
 
 void FiltersMenu::createConnects() {
-    connect(ui->graphicsView,   SIGNAL(updatePos(QPoint)),  this, SLOT(updateScene(QPoint)));
-
-    connect(ui->graphicsView, &FilterGraphicsView::mouseRelease, this, [this](QPoint pos) {
-        x = qBound(0, int(x + pos.x()), int(this->image.width() - width));
-        y = qBound(0, int(y + pos.y()), int(this->image.height() - height));
-    });
-    connect(this, &FiltersMenu::accepted, this, [this](void) {
-        emit blurRadius(ui->radiusSpinBox->value());
-    });
-    //zmiana promienia rozmycia
-    connect(ui->radiusSpinBox, QOverload<int>::of(&QSpinBox::valueChanged),  this, [this](void) {
-        timer->start(400);
-    });
-    //po 0.4 s zmiana podgladu
-    connect(timer, &QTimer::timeout, this, [this](void) {
-        radiusChanged(ui->radiusSpinBox->value());
-        timer->stop();
-    });
+    //przesuwanie podgladu myszka
+    connect(ui->graphicsView,   SIGNAL(updatePos(QPoint)),   this, SLOT(updateScene(QPoint)));
+    connect(ui->graphicsView,   SIGNAL(mouseRelease(QPoint)),this, SLOT(mouseReleased(QPoint)));
+    //po kliknieciu "ok" - wyslanie wybranego promienia rozmycia
+    connect(this,               SIGNAL(accepted()),          this, SLOT(blurRadiusSelected()));
+    //rozmycie podgladu po 0.4s od ostatniej zmiany spinboxa - optymalizacja
+    connect(ui->radiusSpinBox,  SIGNAL(valueChanged(int)),   this, SLOT(waitWithPreviewBlur()));
+    connect(timer,              SIGNAL(timeout()),           this, SLOT(blurPreview()));
 }
 
 void FiltersMenu::initScene() {

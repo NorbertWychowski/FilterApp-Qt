@@ -36,14 +36,24 @@ private slots:
     void gaussFilter();
     void highPassFilter();
 
-    void thresholdSliderValueChanged(int);
-    void featherSliderValueChanged(int);
-    void featherCheckBoxChanged(bool);
+    void thresholdSliderValueChanged(int value);
+    void featherSliderValueChanged(int value);
+    void featherCheckBoxChanged(bool visible);
+    void selectByColorButtonClicked(bool clicked);
+    void rectangleSelectButtonClicked(bool clicked);
+    void rectangleSelection(QRect rectangleSelectionArea);
+
+    void invertSelectedAreaColors();
 
 private:
     Ui::MainWindow *ui;
 
     bool isSelectMask;
+
+    struct stackNode {
+        QImage image;
+        bool movedSelection;
+    };
 
     QGraphicsScene *scene = nullptr;
     QGraphicsPixmapItem *imageItem = nullptr;
@@ -51,8 +61,8 @@ private:
     CustomMaskDialog *dialog = nullptr;
     FiltersMenu *filtersMenu = nullptr;
     SelectionTool *selectTool = nullptr;
-    QStack<QImage> undoStack;
-    QStack<QImage> redoStack;
+    QStack<stackNode> undoStack;
+    QStack<stackNode> redoStack;
     QImage image;
     Filter filter;
     QTimer timer;

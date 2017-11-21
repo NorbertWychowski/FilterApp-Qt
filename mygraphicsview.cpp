@@ -86,7 +86,7 @@ void myGraphicsView::mouseReleaseEvent(QMouseEvent *event) {
     if(event->button() & Qt::LeftButton) {
         if(isRectSelect) {
             if(!rectItem->rect().isNull())
-                emit rectSelected(rectItem->rect().toRect());
+                emit selectedArea(rectItem->rect().toRect());
 
             scene()->removeItem((QGraphicsItem*)rectItem);
             scene()->removeItem((QGraphicsItem*)rectItemBorder);

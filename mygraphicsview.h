@@ -7,7 +7,7 @@ class myGraphicsView : public QGraphicsView {
     Q_OBJECT
 signals:
     void zoomChanged(int);
-    void rectSelected(QRect);
+    void selectedArea(QRect);
 
 public:
     myGraphicsView(QWidget * parent = 0);

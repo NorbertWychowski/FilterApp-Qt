@@ -24,8 +24,12 @@ public:
 
     void resizeEvent(QResizeEvent *);
 
-protected slots:
+private slots:
     void updateScene(QPoint pos);
+    void mouseReleased(QPoint pos);
+    void blurRadiusSelected();
+    void waitWithPreviewBlur();
+    void blurPreview();
 
 private:
     Ui::FiltersMenu *ui;

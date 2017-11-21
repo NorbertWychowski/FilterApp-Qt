@@ -151,7 +151,7 @@ QImage Filter::splot(QImage &img, FILTER choose, __int8 ** selectedTab, Matrix u
                     for (int i = 0; i<M; ++i) {
                         QRgb *imgLine = (QRgb*)img.scanLine(y - N/2 + i);
                         for (int j = 0; j<N; ++j) {
-                            color = imgLine[x - N + j];
+                            color = imgLine[x - N/2 + j];
                             r += kernel[i][j] * qRed(color);
                             g += kernel[i][j] * qGreen(color);
                             b += kernel[i][j] * qBlue(color);
