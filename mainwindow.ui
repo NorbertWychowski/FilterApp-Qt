@@ -36,6 +36,19 @@
        <enum>QFrame::Sunken</enum>
       </property>
       <layout class="QGridLayout" name="gridLayout_2">
+       <item row="1" column="0" colspan="2">
+        <spacer name="verticalSpacer">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
        <item row="0" column="0">
         <widget class="QPushButton" name="rectangleSelectButton">
          <property name="text">
@@ -286,19 +299,6 @@ QSlider::sub-page:horizontal {
          </widget>
         </widget>
        </item>
-       <item row="1" column="0" colspan="2">
-        <spacer name="verticalSpacer">
-         <property name="orientation">
-          <enum>Qt::Vertical</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>20</width>
-           <height>40</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
       </layout>
      </widget>
     </item>
@@ -320,7 +320,7 @@ QSlider::sub-page:horizontal {
        <number>1</number>
       </property>
       <property name="maximum">
-       <number>7</number>
+       <number>8</number>
       </property>
       <property name="pageStep">
        <number>1</number>

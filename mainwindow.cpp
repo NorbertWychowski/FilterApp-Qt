@@ -10,6 +10,9 @@
 #include <QWheelEvent>
 #include <QKeyEvent>
 #include <QTransform>
+#include <QTimer>
+
+#include <QDebug>
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
     ui->setupUi(this);
@@ -125,7 +128,7 @@ void MainWindow::lowPassFilter() {
     filtersMenu = new FiltersMenu(image, LOWPASS_FILTER, this);
     filtersMenu->setWindowTitle("Filtr uśredniający");
 
-    connect(filtersMenu, QOverload<int>::of(&FiltersMenu::blurRadius), this, [&](int radius) {
+    connect(filtersMenu, &FiltersMenu::blurRadius, this, [&](int radius) {
         QApplication::setOverrideCursor(Qt::BusyCursor);
 
         undoStack.push(image);
@@ -136,7 +139,6 @@ void MainWindow::lowPassFilter() {
             image = BoxBlur(image).blur(radius);
         }
         imageItem->setPixmap(QPixmap::fromImage(image));
-        selectTool->resizeSelectedTab();
 
         QApplication::setOverrideCursor(Qt::ArrowCursor);
     });
@@ -146,7 +148,7 @@ void MainWindow::gaussFilter() {
     filtersMenu = new FiltersMenu(image, GAUSSIAN_FILTER, this);
     filtersMenu->setWindowTitle("Rozmycie Gaussa");
 
-    connect(filtersMenu, QOverload<int>::of(&FiltersMenu::blurRadius), this, [&](int radius) {
+    connect(filtersMenu, &FiltersMenu::blurRadius, this, [&](int radius) {
         QApplication::setOverrideCursor(Qt::BusyCursor);
 
         undoStack.push(image);
@@ -157,7 +159,6 @@ void MainWindow::gaussFilter() {
             image = GaussianBlur(image).blur(radius);
         }
         imageItem->setPixmap(QPixmap::fromImage(image));
-        selectTool->resizeSelectedTab();
 
         QApplication::setOverrideCursor(Qt::ArrowCursor);
     });
@@ -224,6 +225,8 @@ void MainWindow::mousePressEvent(QMouseEvent *event) {
 
             isSelectMask = true;
 
+            timer.start(500);
+
             QApplication::setOverrideCursor(Qt::ArrowCursor);
         }
     }
@@ -259,6 +262,8 @@ void MainWindow::createConnects() {
 
         if (!b) {
             isSelectMask = false;
+
+            timer.stop();
         }
         if(ui->rectangleSelectButton->isChecked())
             ui->rectangleSelectButton->setChecked(false);
@@ -275,14 +280,33 @@ void MainWindow::createConnects() {
         } else {
             ui->graphicsView->disableRectSelect();
             isSelectMask = false;
+
+            timer.stop();
         }
         if(ui->selectByColorButton->isChecked())
             ui->selectByColorButton->setChecked(false);
     });
 
     connect(ui->graphicsView, &myGraphicsView::rectSelected,    this, [this](QRect selectRect) {
-        selectedAreaItem->setPixmap(QPixmap::fromImage(selectTool->rectangleSelect(selectRect)));
+        QRect tmp = selectRect;
+
+        if(tmp.left() < 0) tmp.setLeft(0);
+        if(tmp.right() >= image.width()) tmp.setRight(image.width() - 1);
+        if(tmp.top() < 0) tmp.setTop(0);
+        if(tmp.bottom() >= image.height()) tmp.setBottom(image.height() - 1);
+
+        qDebug() << tmp.left() << " " << tmp.right() << " " << tmp.top() << " " << tmp.bottom();
+
+        selectedAreaItem->setPixmap(QPixmap::fromImage(selectTool->rectangleSelect(tmp)));
         isSelectMask = true;
+
+        timer.start(500);
+    });
+
+    connect(&timer, &QTimer::timeout, this, [this](void) {
+        QImage tmp = selectedAreaItem->pixmap().toImage();
+        tmp.invertPixels();
+        selectedAreaItem->setPixmap(QPixmap::fromImage(tmp));
     });
 }
 

@@ -22,14 +22,12 @@ private:
     int* boxesForGauss(double sigma, int n);
     void boxBlur_4(int* source, int* dest, int w, int h, int r);
 
-    QRgb* source;
     int* _red;
     int* _green;
     int* _blue;
     int* newRed;
     int* newGreen;
     int* newBlue;
-    int* dest ;
 
     int _width;
     int _height;

@@ -9,6 +9,7 @@
 #include <QMainWindow>
 #include <QGraphicsScene>
 #include <QStack>
+#include <QTimer>
 
 namespace Ui {
 class MainWindow;
@@ -54,6 +55,7 @@ private:
     QStack<QImage> redoStack;
     QImage image;
     Filter filter;
+    QTimer timer;
 
     void createConnects();
     void initScene();

@@ -64,9 +64,16 @@ QImage BoxBlur::blur(int radius, __int8 **selectedTab) {
             for (int i = start; i< end; ++i) {
                 for (int j = 0; j<_width; ++j) {
                     if (selectedTab[i][j] == 1) {
-                        newRed[i] = qBound(0, _red[i], 255);
-                        newGreen[i] = qBound(0, _green[i], 255);
-                        newBlue[i] = qBound(0, _blue[i], 255);
+                        newRed[i] = _red[i];
+                        newGreen[i] = _green[i];
+                        newBlue[i] = _blue[i];
+
+                        if(newRed[i] < 0)           newRed[i] = 0;
+                        else if(newRed[i] > 255)    newRed[i] = 255;
+                        if(newGreen[i] < 0 )        newGreen[i] = 0;
+                        else if(newGreen[i] > 255)  newGreen[i] = 255;
+                        if(newBlue[i] < 0)          newBlue[i] = 0;
+                        else if(newBlue[i] > 255)   newBlue[i] = 255;
 
                         image.setPixel(j, i, qRgb(newRed[row + j], newGreen[row + j], newBlue[row + j]));
                     }
@@ -76,9 +83,16 @@ QImage BoxBlur::blur(int radius, __int8 **selectedTab) {
         } else {
             for (int i = start; i< end; ++i) {
                 for (int j = 0; j<_width; ++j) {
-                    newRed[i] = qBound(0, _red[i], 255);
-                    newGreen[i] = qBound(0, _green[i], 255);
-                    newBlue[i] = qBound(0, _blue[i], 255);
+                    newRed[i] = _red[i];
+                    newGreen[i] = _green[i];
+                    newBlue[i] = _blue[i];
+
+                    if(newRed[i] < 0)           newRed[i] = 0;
+                    else if(newRed[i] > 255)    newRed[i] = 255;
+                    if(newGreen[i] < 0 )        newGreen[i] = 0;
+                    else if(newGreen[i] > 255)  newGreen[i] = 255;
+                    if(newBlue[i] < 0)          newBlue[i] = 0;
+                    else if(newBlue[i] > 255)   newBlue[i] = 255;
 
                     image.setPixel(j, i, qRgb(newRed[row + j], newGreen[row + j], newBlue[row + j]));
                 }

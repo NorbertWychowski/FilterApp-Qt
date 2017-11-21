@@ -22,8 +22,10 @@ public:
     explicit FiltersMenu(QImage &image, int filter, QWidget *parent = 0);
     ~FiltersMenu();
 
-    void updateScene(QPoint pos);
     void resizeEvent(QResizeEvent *);
+
+protected slots:
+    void updateScene(QPoint pos);
 
 private:
     Ui::FiltersMenu *ui;

@@ -13,27 +13,16 @@ GaussianBlur::GaussianBlur(QImage &image) {
     _red = new int[_width * _height];
     _green = new int[_width * _height];
     _blue = new int[_width * _height];
-    source = new QRgb[_width * _height];
 
     for(int j=0; j<maxThreads; ++j)
         futures.addFuture(QtConcurrent::run([=] {
         for (int i = j*_height/maxThreads; i<(j+1)*_height/maxThreads; ++i) {
             QRgb *t = (QRgb*)image.scanLine(i);
-            for (int j = 0; j<_width; ++j)
-                source[i*_width + j] = t[j];
-        }
-    }));
-
-    futures.waitForFinished();
-    futures.clearFutures();
-
-    for(int j=0; j<maxThreads; ++j)
-        futures.addFuture(QtConcurrent::run([=] {
-        for (int i = j*_width * _height/maxThreads; i<(j+1)*_width * _height/maxThreads; ++i) {
-            QRgb col = source[i];
-            _red[i] = qRed(col);
-            _green[i] = qGreen(col);
-            _blue[i] = qBlue(col);
+            for (int j = 0; j<_width; ++j) {
+                _red[i*_width + j] = qRed(t[j]);
+                _green[i*_width + j] = qGreen(t[j]);
+                _blue[i*_width + j] = qBlue(t[j]);
+            }
         }
     }));
 
@@ -47,8 +36,6 @@ GaussianBlur::~GaussianBlur() {
     delete[] newRed;
     delete[] newGreen;
     delete[] newBlue;
-    delete[] dest;
-    delete[] source;
     delete[] _red;
     delete[] _green;
     delete[] _blue;
@@ -61,22 +48,19 @@ QImage GaussianBlur::blur(int radius, __int8 **selectedTab) {
     newRed = new int[_width * _height];
     newGreen = new int[_width * _height];
     newBlue = new int[_width * _height];
-    dest = new int[_width * _height];
 
-    gaussBlur_4(_red, newRed, radius);
-    gaussBlur_4(_green, newGreen, radius);
-    gaussBlur_4(_blue, newBlue, radius);
+    int r = qSqrt(-(radius * radius) / (2.0 * log(1.0 / 255.0)));
 
-    auto createImage = [=](int start, int end) {
+    gaussBlur_4(_red, newRed, r);
+    gaussBlur_4(_green, newGreen, r);
+    gaussBlur_4(_blue, newBlue, r);
+
+    auto createImage = [&](int start, int end) {
         int row = start*_width;
         if (selectedTab != nullptr) {
             for (int i = start; i< end; ++i) {
                 for (int j = 0; j<_width; ++j) {
                     if (selectedTab[i][j] == 1) {
-                        newRed[i] = qBound(0, _red[i], 255);
-                        newGreen[i] = qBound(0, _green[i], 255);
-                        newBlue[i] = qBound(0, _blue[i], 255);
-
                         image.setPixel(j, i, qRgb(newRed[row + j], newGreen[row + j], newBlue[row + j]));
                     }
                 }
@@ -85,10 +69,6 @@ QImage GaussianBlur::blur(int radius, __int8 **selectedTab) {
         } else {
             for (int i = start; i< end; ++i) {
                 for (int j = 0; j<_width; ++j) {
-                    newRed[i] = qBound(0, _red[i], 255);
-                    newGreen[i] = qBound(0, _green[i], 255);
-                    newBlue[i] = qBound(0, _blue[i], 255);
-
                     image.setPixel(j, i, qRgb(newRed[row + j], newGreen[row + j], newBlue[row + j]));
                 }
                 row += _width;
@@ -106,7 +86,7 @@ QImage GaussianBlur::blur(int radius, __int8 **selectedTab) {
 }
 
 void GaussianBlur::gaussBlur_4(int *source, int *dest, int r) {
-    int *bxs = boxesForGauss(qSqrt(-(r * r) / (2.0 * log(1.0 / 255.0))), 3);
+    int *bxs = boxesForGauss(r, 3);
     boxBlur_4(source, dest, _width, _height, (bxs[0] - 1) / 2);
     boxBlur_4(dest, source, _width, _height, (bxs[1] - 1) / 2);
     boxBlur_4(source, dest, _width, _height, (bxs[2] - 1) / 2);
@@ -145,7 +125,7 @@ void GaussianBlur::boxBlur_4(int *source, int *dest, int w, int h, int r) {
     futures.waitForFinished();
     futures.clearFutures();
 
-    auto boxBlurH_4 = [=](int start, int end) {
+    auto boxBlurH_4 = [&](int start, int end) {
         int ti, li, ri, fv, lv, val;
         for (int i = start; i < end; ++i) {
             ti = i * w;
@@ -170,7 +150,7 @@ void GaussianBlur::boxBlur_4(int *source, int *dest, int w, int h, int r) {
         }
     };
 
-    auto boxBlurT_4 = [=](int start, int end) {
+    auto boxBlurT_4 = [&](int start, int end) {
         int ti, li, ri, fv, lv, val;
         for (int i = start; i < end; ++i) {
             ti = i;
@@ -205,6 +185,7 @@ void GaussianBlur::boxBlur_4(int *source, int *dest, int w, int h, int r) {
     for (int i = 0; i<maxThreads; ++i) {
         futures.addFuture(QtConcurrent::run(boxBlurH_4, h*i / maxThreads, h*(i + 1) / maxThreads));
     }
+
 
     futures.waitForFinished();
     futures.clearFutures();

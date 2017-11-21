@@ -28,6 +28,8 @@ private:
     bool isRectSelect;
     QPoint offset;
     QGraphicsRectItem *rectItem;
+    QGraphicsRectItem *rectItemBorder;
+    QGraphicsRectItem *rectItemBorder2;
 };
 
 #endif // MYGRAPHICSVIEW_H

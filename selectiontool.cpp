@@ -8,9 +8,7 @@
 #include <QQueue>
 #include <array>
 #include <QtMath>
-
-#include <QtConcurrent/QtConcurrent>
-#include <QFutureSynchronizer>
+#include <QPainter>
 
 SelectionTool::SelectionTool(QImage *image) {
     this->image = image;
@@ -52,69 +50,48 @@ QImage SelectionTool::selectByColor(int mouse_x, int mouse_y, int threshold) {
     }
 
     QColor baseColor = image->pixelColor(mouse_x, mouse_y);
-    QColor color;
-    volatile int x1(mouse_x), y1(mouse_y);
     int width = image->width();
     int height = image->height();
 
     QQueue<std::array<int, 2>> queue;
-    queue.push_back({ x1, y1 });
-    selectedTab[y1][x1] = true;
+    queue.push_back({ mouse_x, mouse_y });
+
+    int count = 0;
 
     while (!queue.isEmpty()) {
-        x1 = queue.front()[0];
-        y1 = queue.front()[1];
+        int x1 = qBound(0, queue.front()[0], width - 1);
+        int y1 = qBound(0, queue.front()[1], height - 1);
         queue.pop_front();
 
-        if (x1 + 1 < width && selectedTab[y1][x1 + 1] != 1) {
-            color = image->pixelColor(x1 + 1, y1);
-            if (LabConverter::compareColors(baseColor, color) < threshold) {
-                queue.push_back({ x1 + 1, y1 });
-                selectedTab[y1][x1 + 1] = 1;
-                selectedArea.setPixelColor(x1 + 1, y1, Qt::transparent);
+        if(selectedTab[y1][x1] != 1) {
+            if(LabConverter::compareColors(baseColor, image->pixelColor(x1, y1)) < threshold) {
+                if(selectedTab[y1][x1] == 2)
+                    selectedArea.setPixelColor(x1, y1, Qt::transparent);
+
+                selectedTab[y1][x1] = 1;
+
+                queue.push_back({x1 + 1, y1});
+                queue.push_back({x1 - 1, y1});
+                queue.push_back({x1, y1 + 1});
+                queue.push_back({x1, y1 - 1});
             } else {
-                selectedTab[y1][x1 + 1] = 2;
-                selectedArea.setPixelColor(x1 + 1, y1, Qt::green);
-            }
-        }
-        if ((x1 > 0) && selectedTab[y1][x1 - 1] != 1) {
-            color = image->pixelColor(x1 - 1, y1);
-            if (LabConverter::compareColors(baseColor, color) < threshold) {
-                queue.push_back({ x1 - 1, y1 });
-                selectedTab[y1][x1 - 1] = 1;
-                selectedArea.setPixelColor(x1 - 1, y1, Qt::transparent);
-            } else {
-                selectedTab[y1][x1 - 1] = 2;
-                selectedArea.setPixelColor(x1 - 1, y1, Qt::green);
-            }
-        }
-        if ((y1 + 1 <  height) && selectedTab[y1 + 1][x1] != 1) {
-            color = image->pixelColor(x1, y1 + 1);
-            if (LabConverter::compareColors(baseColor, color) < threshold) {
-                queue.push_back({ x1, y1 + 1 });
-                selectedTab[y1 + 1][x1] = 1;
-                selectedArea.setPixelColor(x1, y1 + 1, Qt::transparent);
-            } else {
-                selectedTab[y1 + 1][x1] = 2;
-                selectedArea.setPixelColor(x1, y1 + 1, Qt::green);
-            }
-        }
-        if ((y1 > 0) && selectedTab[y1 - 1][x1] != 1) {
-            color = image->pixelColor(x1, y1 - 1);
-            if (LabConverter::compareColors(baseColor, color) < threshold) {
-                queue.push_back({ x1, y1 - 1 });
-                selectedTab[y1 - 1][x1] = 1;
-                selectedArea.setPixelColor(x1, y1 - 1, Qt::transparent);
-            } else {
-                selectedTab[y1 - 1][x1] = 2;
-                selectedArea.setPixelColor(x1, y1 - 1, Qt::green);
+                count++;
+                if(count == 8)
+                    count = 0;
+
+                selectedTab[y1][x1] = 2;
+                if(count < 4) {
+                    selectedArea.setPixelColor(x1, y1, Qt::white);
+                } else if(count < 8) {
+                    selectedArea.setPixelColor(x1, y1, Qt::black);
+                }
             }
         }
     }
 
     return selectedArea;
 }
-#include <QPainter>
+
 QImage SelectionTool::selectByColor(int mouse_x, int mouse_y, int threshold, int feather) {
     if (mouse_x < 0 || mouse_y < 0 || mouse_x > image->width() || mouse_y > image->height())
         return QImage();
@@ -131,7 +108,6 @@ QImage SelectionTool::selectByColor(int mouse_x, int mouse_y, int threshold, int
     }
 
     QColor baseColor = tmp.pixelColor(mouse_x, mouse_y);
-    QColor color;
     volatile int x1(mouse_x), y1(mouse_y);
     int width = image->width();
     int height = image->height();
@@ -142,14 +118,14 @@ QImage SelectionTool::selectByColor(int mouse_x, int mouse_y, int threshold, int
 
     QQueue<std::array<int, 2>> queue;
     queue.push_back({ x1, y1 });
-    selectedTab[y1][x1] = true;
+    int count = 0;
 
     while (!queue.isEmpty()) {
-        x1 = queue.front()[0];
-        y1 = queue.front()[1];
+        x1 = qBound(0, queue.front()[0], width - 1);
+        y1 = qBound(0, queue.front()[1], height - 1);
         queue.pop_front();
 
-        if (x1 + 1 < width && selectedTab[y1][x1 + 1] != 1) {
+        if (selectedTab[y1][x1] != 1) {
             int i = (x1 + 1) / blurTabWidth;
             int j = y1 / blurTabHeight;
             if(!blurTab[i][j]) {
@@ -159,74 +135,27 @@ QImage SelectionTool::selectByColor(int mouse_x, int mouse_y, int threshold, int
                 blurTab[i][j] = true;
             }
 
-            color = tmp.pixelColor(x1 + 1, y1);
-            if (LabConverter::compareColors(baseColor, color) < threshold) {
+            if (LabConverter::compareColors(baseColor, tmp.pixelColor(x1, y1)) < threshold) {
+                if(selectedTab[y1][x1] == 2)
+                    selectedArea.setPixelColor(x1, y1, Qt::transparent);
+
+                selectedTab[y1][x1] = 1;
+
                 queue.push_back({ x1 + 1, y1 });
-                selectedTab[y1][x1 + 1] = 1;
-                selectedArea.setPixelColor(x1 + 1, y1, Qt::transparent);
-            } else {
-                selectedTab[y1][x1 + 1] = 2;
-                selectedArea.setPixelColor(x1 + 1, y1, Qt::green);
-            }
-        }
-        if ((x1 > 0) && selectedTab[y1][x1 - 1] != 1) {
-            int i = (x1 - 1) / blurTabWidth;
-            int j = y1 / blurTabHeight;
-            if(!blurTab[i][j]) {
-                painter.drawImage(i * blurTabWidth, j * blurTabHeight,
-                                  GaussianBlur(image->copy(i * blurTabWidth, j * blurTabHeight,
-                                               blurTabWidth, blurTabHeight)).blur(feather));
-                blurTab[i][j] = true;
-            }
-
-            color = tmp.pixelColor(x1 - 1, y1);
-            if (LabConverter::compareColors(baseColor, color) < threshold) {
                 queue.push_back({ x1 - 1, y1 });
-                selectedTab[y1][x1 - 1] = 1;
-                selectedArea.setPixelColor(x1 - 1, y1, Qt::transparent);
-            } else {
-                selectedTab[y1][x1 - 1] = 2;
-                selectedArea.setPixelColor(x1 - 1, y1, Qt::green);
-            }
-        }
-        if ((y1 + 1 <  height) && selectedTab[y1 + 1][x1] != 1) {
-            int i = x1 / blurTabWidth;
-            int j = (y1 + 1) / blurTabHeight;
-            if(!blurTab[i][j]) {
-                painter.drawImage(i * blurTabWidth, j * blurTabHeight,
-                                  GaussianBlur(image->copy(i * blurTabWidth, j * blurTabHeight,
-                                               blurTabWidth, blurTabHeight)).blur(feather));
-                blurTab[i][j] = true;
-            }
-
-            color = tmp.pixelColor(x1, y1 + 1);
-            if (LabConverter::compareColors(baseColor, color) < threshold) {
                 queue.push_back({ x1, y1 + 1 });
-                selectedTab[y1 + 1][x1] = 1;
-                selectedArea.setPixelColor(x1, y1 + 1, Qt::transparent);
-            } else {
-                selectedTab[y1 + 1][x1] = 2;
-                selectedArea.setPixelColor(x1, y1 + 1, Qt::green);
-            }
-        }
-        if ((y1 > 0) && selectedTab[y1 - 1][x1] != 1) {
-            int i = x1 / blurTabWidth;
-            int j = (y1 - 1) / blurTabHeight;
-            if(!blurTab[i][j]) {
-                painter.drawImage(i * blurTabWidth, j * blurTabHeight,
-                                  GaussianBlur(image->copy(i * blurTabWidth, j * blurTabHeight,
-                                               blurTabWidth, blurTabHeight)).blur(feather));
-                blurTab[i][j] = true;
-            }
-
-            color = tmp.pixelColor(x1, y1 - 1);
-            if (LabConverter::compareColors(baseColor, color) < threshold) {
                 queue.push_back({ x1, y1 - 1 });
-                selectedTab[y1 - 1][x1] = 1;
-                selectedArea.setPixelColor(x1, y1 - 1, Qt::transparent);
             } else {
-                selectedTab[y1 - 1][x1] = 2;
-                selectedArea.setPixelColor(x1, y1 - 1, Qt::green);
+                count++;
+                if(count == 8)
+                    count = 0;
+
+                selectedTab[y1][x1] = 2;
+                if(count < 4) {
+                    selectedArea.setPixelColor(x1, y1, Qt::white);
+                } else if(count < 8) {
+                    selectedArea.setPixelColor(x1, y1, Qt::black);
+                }
             }
         }
     }
@@ -250,26 +179,69 @@ QImage SelectionTool::rectangleSelect(QRect rectSelect) {
             selectedTab[j][i] = 1;
             selectedArea.setPixelColor(i, j, Qt::transparent);
         }
+
+    int count = 0;
     for(int i = p1.x() - 1; i < p2.x() + 1; ++i) {
-        if(selectedTab[p1.y() - 1][i] == 0) {
-            selectedTab[p1.y() - 1][i] = 2;
-            selectedArea.setPixelColor(i, p1.y() - 1, Qt::green);
-        }
-        if(selectedTab[p2.y() + 1][i] == 0) {
-            selectedTab[p2.y() + 1][i] = 2;
-            selectedArea.setPixelColor(i, p2.y() + 1, Qt::green);
-        }
+        if(i < 0) continue;
+        if(i >= image->width()) break;
+
+        count++;
+        if(count == 16)
+            count = 0;
+        if(p1.y() > 0)
+            if(selectedTab[p1.y() - 1][i] == 0) {
+                selectedTab[p1.y() - 1][i] = 2;
+                if(count < 8) {
+                    selectedArea.setPixelColor(i, p1.y() - 1, Qt::white);
+                    selectedArea.setPixelColor(i, p1.y(), Qt::white);
+                } else if (count < 16) {
+                    selectedArea.setPixelColor(i, p1.y(), Qt::black);
+                    selectedArea.setPixelColor(i, p1.y() - 1, Qt::black);
+                }
+            }
+        if(p2.y() < image->height() - 1)
+            if(selectedTab[p2.y() + 1][i] == 0) {
+                selectedTab[p2.y() + 1][i] = 2;
+                if(count < 8) {
+                    selectedArea.setPixelColor(i, p2.y() + 1, Qt::white);
+                    selectedArea.setPixelColor(i, p2.y(), Qt::white);
+                } else if(count < 16) {
+                    selectedArea.setPixelColor(i, p2.y(), Qt::black);
+                    selectedArea.setPixelColor(i, p2.y() + 1, Qt::black);
+                }
+            }
+
     }
 
     for(int i = p1.y() - 1; i < p2.y() + 1; ++i) {
-        if(selectedTab[i][p1.x() - 1] == 0) {
-            selectedTab[i][p1.x() - 1] = 2;
-            selectedArea.setPixelColor(p1.x() - 1, i, Qt::green);
-        }
-        if(selectedTab[i][p2.x() + 1] == 0) {
-            selectedTab[i][p2.x() + 1] = 2;
-            selectedArea.setPixelColor(p2.x() + 1, i, Qt::green);
-        }
+        if(i < 0) continue;
+        if(i >= image->height()) break;
+
+        count++;
+        if(count == 16)
+            count = 0;
+        if(p1.x() > 0)
+            if(selectedTab[i][p1.x() - 1] == 0) {
+                selectedTab[i][p1.x() - 1] = 2;
+                if(count < 8) {
+                    selectedArea.setPixelColor(p1.x() - 1, i, Qt::white);
+                    selectedArea.setPixelColor(p1.x(), i, Qt::white);
+                } else if(count < 16) {
+                    selectedArea.setPixelColor(p1.x(), i, Qt::black);
+                    selectedArea.setPixelColor(p1.x() - 1, i, Qt::black);
+                }
+            }
+        if(p2.x() < image->width() - 1)
+            if(selectedTab[i][p2.x() + 1] == 0) {
+                selectedTab[i][p2.x() + 1] = 2;
+                if(count < 8) {
+                    selectedArea.setPixelColor(p2.x() + 1, i, Qt::white);
+                    selectedArea.setPixelColor(p2.x(), i, Qt::white);
+                } else if(count < 16) {
+                    selectedArea.setPixelColor(p2.x(), i, Qt::black);
+                    selectedArea.setPixelColor(p2.x() + 1, i, Qt::black);
+                }
+            }
     }
 
     return selectedArea;

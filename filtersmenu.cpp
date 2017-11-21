@@ -79,6 +79,7 @@ void FiltersMenu::createConnects() {
     //po 0.4 s zmiana podgladu
     connect(timer, &QTimer::timeout, this, [this](void) {
         radiusChanged(ui->radiusSpinBox->value());
+        timer->stop();
     });
 }
 
