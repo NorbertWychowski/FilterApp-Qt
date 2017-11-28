@@ -12,7 +12,7 @@ class GaussianBlur : public QObject {
     Q_OBJECT
 
 public:
-    GaussianBlur(QImage &image);
+    GaussianBlur(const QImage &image);
     ~GaussianBlur();
 
     QImage blur(int radius, qint8 **selectedTab = nullptr);

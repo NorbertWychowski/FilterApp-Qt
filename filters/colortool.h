@@ -14,10 +14,10 @@ enum COLOR_FILTER {
 
 class ColorTool {
 public:
-    static QImage negative(QImage &img);
-    static QImage desaturate(QImage &img);
-    static QImage sepia(QImage &img);
-    static QImage colorize(QColor color, QImage &img);
+    static QImage negative(QImage img);
+    static QImage desaturate(QImage img);
+    static QImage sepia(QImage img);
+    static QImage colorize(QColor color, QImage img);
 };
 
 #endif // COLORTOOL_H

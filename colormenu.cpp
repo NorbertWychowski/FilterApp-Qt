@@ -5,13 +5,11 @@
 
 #include <QTimer>
 
-ColorMenu::ColorMenu(QImage image, int filterColor, QWidget *parent) : QDialog(parent), ui(new Ui::ColorMenu) {
+ColorMenu::ColorMenu(int filterColor, QWidget *parent) : QDialog(parent), ui(new Ui::ColorMenu) {
     ui->setupUi(this);
     setAttribute(Qt::WA_DeleteOnClose);
 
     this->filterColor = filterColor;
-    this->image = image;
-    copy = image.copy();
 
     timer = new QTimer(this);
     ui->tabWidget->tabBar()->hide();
@@ -34,6 +32,7 @@ ColorMenu::ColorMenu(QImage image, int filterColor, QWidget *parent) : QDialog(p
     setFocus();
     show();
     activateWindow();
+    timer->start(1);
 }
 
 ColorMenu::~ColorMenu() {
@@ -43,9 +42,9 @@ ColorMenu::~ColorMenu() {
 void ColorMenu::draw() {
     switch(filterColor) {
     case COLORIZE:
-        image = ColorTool::colorize(QColor::fromHsv(ui->hueSlider->value(),
-                                    ui->saturationSlider->value(),
-                                    ui->valueSlider->value()), image);
+        emit colorize(QColor::fromHsv(ui->hueSlider->value(),
+                                      ui->saturationSlider->value(),
+                                      ui->valueSlider->value() + 128));
         break;
     case HUESATURATION:
         break;
@@ -84,10 +83,6 @@ void ColorMenu::createConnects() {
     connect(ui->saturationSpinBox, QOverload<int>::of(&QSpinBox::valueChanged), this, [this](int value) {
         ui->saturationSlider->setValue(value);
         waitWithDraw();
-    });
-
-    connect(this, &QDialog::rejected, this, [this]() {
-        image = copy;
     });
 
     connect(timer, SIGNAL(timeout()), this, SLOT(draw()));

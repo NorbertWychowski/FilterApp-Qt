@@ -11,8 +11,11 @@ class ColorMenu;
 class ColorMenu : public QDialog {
     Q_OBJECT
 
+signals:
+    void colorize(QColor color);
+
 public:
-    explicit ColorMenu(QImage image, int filterColor, QWidget *parent = 0);
+    explicit ColorMenu(int filterColor, QWidget *parent = 0);
     ~ColorMenu();
 
 private slots:
@@ -23,8 +26,6 @@ private:
 
     int filterColor;
 
-    QImage image;
-    QImage copy;
     QTimer *timer;
 
     void waitWithDraw();

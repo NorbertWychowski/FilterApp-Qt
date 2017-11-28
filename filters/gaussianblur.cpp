@@ -4,7 +4,7 @@
 #include <QFutureSynchronizer>
 #include <QtMath>
 
-GaussianBlur::GaussianBlur(QImage &image) {
+GaussianBlur::GaussianBlur(const QImage &image) {
     int maxThreads = QThread::idealThreadCount();
     QFutureSynchronizer<void> futures;
 
@@ -185,7 +185,6 @@ void GaussianBlur::boxBlur_4(int *source, int *dest, int w, int h, int r) {
     for (int i = 0; i<maxThreads; ++i) {
         futures.addFuture(QtConcurrent::run(boxBlurH_4, h*i / maxThreads, h*(i + 1) / maxThreads));
     }
-
 
     futures.waitForFinished();
     futures.clearFutures();

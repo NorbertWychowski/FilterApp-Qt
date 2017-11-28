@@ -193,7 +193,7 @@ void MainWindow::highPassFilter() {
 
     QApplication::setOverrideCursor(Qt::ArrowCursor);
 }
-
+#include <QDebug>
 void MainWindow::colorFilter(int colorFilter) {
     QApplication::setOverrideCursor(Qt::BusyCursor);
 
@@ -211,15 +211,26 @@ void MainWindow::colorFilter(int colorFilter) {
         image = ColorTool::desaturate(image);
         break;
     case COLORIZE:
-        colorMenu = new ColorMenu(image, COLORIZE, this);
+        colorMenu = new ColorMenu(COLORIZE, this);
         colorMenu->setWindowTitle("Koloryzacja");
+
+        connect(colorMenu, &QDialog::rejected, this, [&, this]() {
+            imageItem->setPixmap(QPixmap::fromImage(image));
+        });
+        connect(colorMenu, &ColorMenu::colorize, this, [&, this](QColor color) {
+            imageItem->setPixmap(QPixmap::fromImage(ColorTool::colorize(color, image)));
+        });
+        connect(colorMenu, &ColorMenu::accepted, this, [&, this]() {
+            image = imageItem->pixmap().toImage();
+            imageItem->setPixmap(QPixmap::fromImage(image));
+        });
         break;
     case HUESATURATION:
-        colorMenu = new ColorMenu(image, HUESATURATION, this);
+        colorMenu = new ColorMenu(HUESATURATION, this);
         colorMenu->setWindowTitle("Barwa i nasycenie");
         break;
     case BRIGHTNESSCONTRAST:
-        colorMenu = new ColorMenu(image, BRIGHTNESSCONTRAST, this);
+        colorMenu = new ColorMenu(BRIGHTNESSCONTRAST, this);
         colorMenu->setWindowTitle("Jasność i kontrast");
         break;
     }

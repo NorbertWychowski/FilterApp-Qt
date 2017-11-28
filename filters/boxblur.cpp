@@ -3,7 +3,7 @@
 #include <QtConcurrent/QtConcurrentRun>
 #include <QFutureSynchronizer>
 
-BoxBlur::BoxBlur(QImage &image) {
+BoxBlur::BoxBlur(const QImage &image) {
     _width = image.width();
     _height = image.height();
 

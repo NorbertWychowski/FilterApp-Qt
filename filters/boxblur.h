@@ -5,7 +5,7 @@
 
 class BoxBlur {
 public:
-    BoxBlur(QImage &image);
+    BoxBlur(const QImage &image);
     ~BoxBlur();
 
     QImage blur(int radius, qint8 **selectedTab = nullptr);
