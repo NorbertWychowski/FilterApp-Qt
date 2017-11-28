@@ -3,10 +3,12 @@
 
 #include "filters/gaussianblur.h"
 #include "filters/boxblur.h"
+#include "filters/filtertool.h"
 
 #include <QGraphicsPixmapItem>
 #include <QMouseEvent>
 #include <QTimer>
+#include <QWidget>
 
 FiltersMenu::FiltersMenu(QImage &image, int filter, QWidget *parent) : QDialog(parent), ui(new Ui::FiltersMenu) {
     ui->setupUi(this);
@@ -20,10 +22,10 @@ FiltersMenu::FiltersMenu(QImage &image, int filter, QWidget *parent) : QDialog(p
     createConnects();
     initScene();
 
-    activateWindow();
     raise();
     setFocus();
     show();
+    activateWindow();
 }
 
 FiltersMenu::~FiltersMenu() {
@@ -39,10 +41,10 @@ void FiltersMenu::updateScene(QPoint pos) {
     blurredItem->setPos(tmpX, tmpY);
 
     switch(filter) {
-    case 1:
+    case GAUSSIAN_FILTER:
         blurredItem->setPixmap(QPixmap::fromImage(GaussianBlur(image.copy(tmpX, tmpY, width, height)).blur(ui->radiusSpinBox->value())));
         break;
-    case 2:
+    case LOWPASS_FILTER:
         blurredItem->setPixmap(QPixmap::fromImage(BoxBlur(image.copy(tmpX, tmpY, width, height)).blur(ui->radiusSpinBox->value())));
         break;
     }
@@ -71,10 +73,10 @@ void FiltersMenu::resizeEvent(QResizeEvent *) {
     height = ui->graphicsView->height();
 
     switch(filter) {
-    case 1:
+    case GAUSSIAN_FILTER:
         blurredItem->setPixmap(QPixmap::fromImage(GaussianBlur(image.copy(x, y, width, height)).blur(ui->radiusSpinBox->value())));
         break;
-    case 2:
+    case LOWPASS_FILTER:
         blurredItem->setPixmap(QPixmap::fromImage(BoxBlur(image.copy(x, y, width, height)).blur(ui->radiusSpinBox->value())));
         break;
     }

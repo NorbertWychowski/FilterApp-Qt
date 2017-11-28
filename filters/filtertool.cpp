@@ -1,4 +1,4 @@
-#include "filter.h"
+#include "filtertool.h"
 #include "gaussianblur.h"
 #include "boxblur.h"
 
@@ -6,10 +6,7 @@
 #include <QtConcurrent/QtConcurrent>
 #include <QFutureSynchronizer>
 
-Filter::Filter() {
-}
-
-QImage Filter::splot(QImage &img, FILTER choose, Matrix userKernel) {
+QImage FilterTool::splot(QImage &img, FILTER choose, Matrix userKernel) {
     Matrix kernel;
     QImage res;
     GaussianBlur *gaussianBlur = nullptr;
@@ -94,7 +91,7 @@ QImage Filter::splot(QImage &img, FILTER choose, Matrix userKernel) {
     return res;
 }
 
-QImage Filter::splot(QImage &img, FILTER choose, __int8 ** selectedTab, Matrix userKernel) {
+QImage FilterTool::splot(QImage &img, FILTER choose, qint8 ** selectedTab, Matrix userKernel) {
     Matrix kernel;
     QImage res;
     GaussianBlur *gaussianBlur = nullptr;

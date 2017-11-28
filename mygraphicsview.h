@@ -6,7 +6,7 @@
 class myGraphicsView : public QGraphicsView {
     Q_OBJECT
 signals:
-    void zoomChanged(int);
+    void zoomChanged(double);
     void selectedArea(QRect);
 
 public:

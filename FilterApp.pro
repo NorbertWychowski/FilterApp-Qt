@@ -33,11 +33,13 @@ SOURCES += \
     filtersmenu.cpp \
     filtergraphicsview.cpp \
     selectiontool.cpp \
-    filters/filter.cpp \
     filters/boxblur.cpp \
     filters/gaussianblur.cpp \
     filters/math/labconverter.cpp \
-    filters/math/matrix.cpp
+    filters/math/matrix.cpp \
+    filters/colortool.cpp \
+    filters/filtertool.cpp \
+    colormenu.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -46,13 +48,16 @@ HEADERS += \
     filtersmenu.h \
     filtergraphicsview.h \
     selectiontool.h \
-    filters/filter.h \
     filters/boxblur.h \
     filters/gaussianblur.h \
     filters/math/labconverter.h \
-    filters/math/matrix.h
+    filters/math/matrix.h \
+    filters/colortool.h \
+    filters/filtertool.h \
+    colormenu.h
 
 FORMS += \
         mainwindow.ui \
     custommaskdialog.ui \
-    filtersmenu.ui
+    filtersmenu.ui \
+    colormenu.ui

@@ -11,6 +11,7 @@
 #include <QKeyEvent>
 #include <QTransform>
 #include <QTimer>
+#include <QSignalMapper>
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
     ui->setupUi(this);
@@ -40,22 +41,35 @@ MainWindow::~MainWindow() {
     delete ui;
 }
 
-void MainWindow::zoomChanged(int value) {
-    ui->label->setText(QString::number(value) + "%");
-    double v = value / 100.0;
-    if (v >= 1)
-        ui->horizontalSlider->setValue(v + 2);
-    else
-        ui->horizontalSlider->setValue(v * 4);
+void MainWindow::zoomChanged(double value) {
+    if (value >= 1.0)
+        ui->horizontalSlider->setValue(value + 3);
+    else {
+        if(value == 0.125)
+            ui->horizontalSlider->setValue(1);
+        else if(value == 0.25)
+            ui->horizontalSlider->setValue(2);
+        else if(value == 0.5) {
+            ui->horizontalSlider->setValue(3);
+        }
+    }
 }
 
 void MainWindow::sliderChanged(int value) {
-    if (value >= 3) {
-        ui->label->setText(QString::number((value - 2) * 100) + "%");
-        ui->graphicsView->setZoom((value - 2));
+    if (value >= 4) {
+        ui->label->setText(QString::number((value - 3) * 100) + "%");
+        ui->graphicsView->setZoom((value - 3));
     } else {
-        ui->label->setText(QString::number(value * 25) + "%");
-        ui->graphicsView->setZoom((value / 4.0));
+        if(value == 1) {
+            ui->label->setText("12.5%");
+            ui->graphicsView->setZoom(0.125);
+        } else if (value == 2) {
+            ui->label->setText("25%");
+            ui->graphicsView->setZoom(0.25);
+        } else if (value == 3) {
+            ui->label->setText("50%");
+            ui->graphicsView->setZoom(0.5);
+        }
     }
 }
 
@@ -84,8 +98,6 @@ void MainWindow::saveFileAction() {
 void MainWindow::customFilter() {
     dialog = new CustomMaskDialog(this);
     connect(dialog, SIGNAL(customMask(Matrix)), this, SLOT(setCustomFilter(Matrix)));
-
-    dialog->show();
 }
 
 void MainWindow::setCustomFilter(Matrix matrix) {
@@ -94,11 +106,11 @@ void MainWindow::setCustomFilter(Matrix matrix) {
     redoStack.clear();
     if (isSelectMask) {
         undoStack.push({image, true});
-        image = filter.splot(image, USER_FILTER, selectTool->getSelectedTab(), matrix);
+        image = FilterTool::splot(image, USER_FILTER, selectTool->getSelectedTab(), matrix);
         selectedAreaItem->moveBy(-2, -2);
     } else {
         undoStack.push({image, false});
-        image = filter.splot(image, USER_FILTER, matrix);
+        image = FilterTool::splot(image, USER_FILTER, matrix);
     }
     imageItem->setPixmap(QPixmap::fromImage(image));
     selectTool->resizeSelectedTab();
@@ -112,11 +124,11 @@ void MainWindow::laplaceFilter() {
     redoStack.clear();
     if (isSelectMask) {
         undoStack.push({image, true});
-        image = filter.splot(image, LAPLACE_FILTER, selectTool->getSelectedTab());
+        image = FilterTool::splot(image, LAPLACE_FILTER, selectTool->getSelectedTab());
         selectedAreaItem->moveBy(-2, -2);
     } else {
         undoStack.push({image, false});
-        image = filter.splot(image, LAPLACE_FILTER);
+        image = FilterTool::splot(image, LAPLACE_FILTER);
     }
     imageItem->setPixmap(QPixmap::fromImage(image));
     selectTool->resizeSelectedTab();
@@ -170,18 +182,53 @@ void MainWindow::highPassFilter() {
     redoStack.clear();
     if (isSelectMask) {
         undoStack.push({image, true});
-        image = filter.splot(image, HIGHPASS_FILTER, selectTool->getSelectedTab());
+        image = FilterTool::splot(image, HIGHPASS_FILTER, selectTool->getSelectedTab());
         selectedAreaItem->moveBy(-2, -2);
     } else {
         undoStack.push({image, false});
-        image = filter.splot(image, HIGHPASS_FILTER);
+        image = FilterTool::splot(image, HIGHPASS_FILTER);
     }
     imageItem->setPixmap(QPixmap::fromImage(image));
     selectTool->resizeSelectedTab();
 
     QApplication::setOverrideCursor(Qt::ArrowCursor);
 }
-#include <QDebug>
+
+void MainWindow::colorFilter(int colorFilter) {
+    QApplication::setOverrideCursor(Qt::BusyCursor);
+
+    redoStack.clear();
+    undoStack.push({image, true});
+
+    switch(colorFilter) {
+    case NEGATIVE:
+        image = ColorTool::negative(image);
+        break;
+    case SEPIA:
+        image = ColorTool::sepia(image);
+        break;
+    case DESATURATE:
+        image = ColorTool::desaturate(image);
+        break;
+    case COLORIZE:
+        colorMenu = new ColorMenu(image, COLORIZE, this);
+        colorMenu->setWindowTitle("Koloryzacja");
+        break;
+    case HUESATURATION:
+        colorMenu = new ColorMenu(image, HUESATURATION, this);
+        colorMenu->setWindowTitle("Barwa i nasycenie");
+        break;
+    case BRIGHTNESSCONTRAST:
+        colorMenu = new ColorMenu(image, BRIGHTNESSCONTRAST, this);
+        colorMenu->setWindowTitle("Jasność i kontrast");
+        break;
+    }
+
+    imageItem->setPixmap(QPixmap::fromImage(image));
+
+    QApplication::setOverrideCursor(Qt::ArrowCursor);
+}
+
 void MainWindow::keyPressEvent(QKeyEvent *event) {
     if((event->key() == Qt::Key_Z) && (QGuiApplication::keyboardModifiers() & Qt::ControlModifier)) {
         if(!undoStack.isEmpty()) {
@@ -319,8 +366,25 @@ void MainWindow::createConnects() {
     connect(ui->actionLowPass,      SIGNAL(triggered(bool)),    this, SLOT(lowPassFilter()));
     connect(ui->actionGauss,        SIGNAL(triggered(bool)),    this, SLOT(gaussFilter()));
     connect(ui->actionHighPass,     SIGNAL(triggered(bool)),    this, SLOT(highPassFilter()));
+    //filtry koloru
+    QSignalMapper *signalMapper = new QSignalMapper(this);
+
+    connect(ui->actionNegative,     SIGNAL(triggered()),        signalMapper, SLOT(map()));
+    connect(ui->actionSepia,        SIGNAL(triggered()),        signalMapper, SLOT(map()));
+    connect(ui->actionDesaturate,   SIGNAL(triggered()),        signalMapper, SLOT(map()));
+    connect(ui->actionColorize,     SIGNAL(triggered()),        signalMapper, SLOT(map()));
+    connect(ui->actionBrightnessContrast, SIGNAL(triggered()),  signalMapper, SLOT(map()));
+    connect(ui->actionHueSaturation,SIGNAL(triggered()),        signalMapper, SLOT(map()));
+    signalMapper->setMapping(ui->actionNegative,    NEGATIVE);
+    signalMapper->setMapping(ui->actionSepia,       SEPIA);
+    signalMapper->setMapping(ui->actionDesaturate,  DESATURATE);
+    signalMapper->setMapping(ui->actionColorize,    COLORIZE);
+    signalMapper->setMapping(ui->actionBrightnessContrast, BRIGHTNESSCONTRAST);
+    signalMapper->setMapping(ui->actionHueSaturation, HUESATURATION);
+
+    connect(signalMapper,           SIGNAL(mapped(int)),        this, SLOT(colorFilter(int)));
     //kontrolki i zoom
-    connect(ui->graphicsView,       SIGNAL(zoomChanged(int)),   this, SLOT(zoomChanged(int)));
+    connect(ui->graphicsView,       SIGNAL(zoomChanged(double)),this, SLOT(zoomChanged(double)));
     connect(ui->horizontalSlider,   SIGNAL(valueChanged(int)),  this, SLOT(sliderChanged(int)));
     connect(ui->thresholdSlider,    SIGNAL(valueChanged(int)),  this, SLOT(thresholdSliderValueChanged(int)));
     connect(ui->featherSlider,      SIGNAL(valueChanged(int)),  this, SLOT(featherSliderValueChanged(int)));

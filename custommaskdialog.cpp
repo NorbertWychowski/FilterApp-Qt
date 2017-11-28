@@ -6,12 +6,14 @@ CustomMaskDialog::CustomMaskDialog(QWidget *parent) : QDialog(parent), ui(new Ui
 
     setAttribute(Qt::WA_DeleteOnClose);
 
-    activateWindow();
-    raise();
-    setFocus();
 
     createSpinBoxes();
     connect(ui->buttonBox, SIGNAL(accepted()), this, SLOT(buttonBoxAccepted()));
+
+    raise();
+    setFocus();
+    show();
+    activateWindow();
 }
 
 CustomMaskDialog::~CustomMaskDialog() {

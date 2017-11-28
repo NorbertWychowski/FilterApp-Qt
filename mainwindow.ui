@@ -320,13 +320,13 @@ QSlider::sub-page:horizontal {
        <number>1</number>
       </property>
       <property name="maximum">
-       <number>8</number>
+       <number>11</number>
       </property>
       <property name="pageStep">
        <number>1</number>
       </property>
       <property name="value">
-       <number>3</number>
+       <number>4</number>
       </property>
       <property name="orientation">
        <enum>Qt::Horizontal</enum>
@@ -435,8 +435,21 @@ QSlider::sub-page:horizontal {
     <addaction name="menuWykrycie_kraw_dzi"/>
     <addaction name="actionCustomMask"/>
    </widget>
+   <widget class="QMenu" name="menuKolory">
+    <property name="title">
+     <string>Kolory</string>
+    </property>
+    <addaction name="actionHueSaturation"/>
+    <addaction name="actionColorize"/>
+    <addaction name="actionBrightnessContrast"/>
+    <addaction name="separator"/>
+    <addaction name="actionNegative"/>
+    <addaction name="actionSepia"/>
+    <addaction name="actionDesaturate"/>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuFiltry"/>
+   <addaction name="menuKolory"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <action name="actionOpen">
@@ -472,6 +485,36 @@ QSlider::sub-page:horizontal {
   <action name="actionSaveAs">
    <property name="text">
     <string>Zapisz jako...</string>
+   </property>
+  </action>
+  <action name="actionHueSaturation">
+   <property name="text">
+    <string>Barwa i nasycenie</string>
+   </property>
+  </action>
+  <action name="actionColorize">
+   <property name="text">
+    <string>Koloryzacja</string>
+   </property>
+  </action>
+  <action name="actionBrightnessContrast">
+   <property name="text">
+    <string>Jasność i kontrast</string>
+   </property>
+  </action>
+  <action name="actionNegative">
+   <property name="text">
+    <string>Negatyw</string>
+   </property>
+  </action>
+  <action name="actionSepia">
+   <property name="text">
+    <string>Sepia</string>
+   </property>
+  </action>
+  <action name="actionDesaturate">
+   <property name="text">
+    <string>Desaturacja</string>
    </property>
   </action>
  </widget>

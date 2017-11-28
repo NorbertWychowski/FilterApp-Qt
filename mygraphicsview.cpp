@@ -25,28 +25,23 @@ void myGraphicsView::setZoom(double value) {
 
 void myGraphicsView::wheelEvent(QWheelEvent *event) {
     if (QGuiApplication::keyboardModifiers() & Qt::ControlModifier) {
-        int numDegrees = event->delta() / 8;
-        int numSteps = numDegrees / 15;
 
-        if (numSteps > 0 && zoom < 6.0) {
+        if (event->delta() > 0 && zoom < 8.0) {
             if (zoom <1)
                 zoom *= 2;
             else
                 zoom += 1;
 
-            resetMatrix();
-            scale(zoom, zoom);
-            emit zoomChanged(100 * zoom);
-        } else if (numSteps < 0 && zoom > 0.25) {
+        } else if (event->delta() < 0 && zoom > 0.125) {
             if (zoom <= 1)
                 zoom *= 0.5;
             else
                 zoom += -1;
-
-            resetMatrix();
-            scale(zoom, zoom);
-            emit zoomChanged(100 * zoom);
         }
+
+        resetMatrix();
+        scale(zoom, zoom);
+        emit zoomChanged(zoom);
     } else {
         QGraphicsView::wheelEvent(event);
     }

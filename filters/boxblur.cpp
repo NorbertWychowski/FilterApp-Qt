@@ -32,7 +32,7 @@ BoxBlur::~BoxBlur() {
     delete[] newBlue;
 }
 
-QImage BoxBlur::blur(int radius, __int8 **selectedTab) {
+QImage BoxBlur::blur(int radius, qint8 **selectedTab) {
     int maxThreads = QThread::idealThreadCount();
     QFutureSynchronizer<void> futures;
 

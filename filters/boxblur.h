@@ -8,7 +8,7 @@ public:
     BoxBlur(QImage &image);
     ~BoxBlur();
 
-    QImage blur(int radius, __int8 **selectedTab = nullptr);
+    QImage blur(int radius, qint8 **selectedTab = nullptr);
 
 private:
     void boxBlur(int *source, int *dest, int w, int h, int r);

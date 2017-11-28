@@ -1,7 +1,7 @@
 #include "selectiontool.h"
 
 #include "filters/gaussianblur.h"
-#include "filters/filter.h"
+#include "filters/filtertool.h"
 #include "filters/math/labconverter.h"
 
 #include <QGuiApplication>
@@ -13,9 +13,9 @@
 SelectionTool::SelectionTool(QImage *image) {
     this->image = image;
 
-    selectedTab = new __int8 *[image->height()];
+    selectedTab = new qint8 *[image->height()];
     for (int i = 0; i<image->height(); i++)
-        selectedTab[i] = new __int8[image->width()]();
+        selectedTab[i] = new qint8[image->width()]();
 }
 
 SelectionTool::~SelectionTool() {
@@ -25,15 +25,15 @@ SelectionTool::~SelectionTool() {
 }
 
 void SelectionTool::resizeSelectedTab() {
-    selectedTab = new __int8 *[image->height()];
+    selectedTab = new qint8 *[image->height()];
     for (int i = 0; i<image->height(); i++)
-        selectedTab[i] = new __int8[image->width()]();
+        selectedTab[i] = new qint8[image->width()]();
 
     selectedArea = QImage(image->size(), QImage::Format_ARGB32);
     selectedArea.fill(qRgba(0, 0, 0, 0));
 }
 
-__int8 ** SelectionTool::getSelectedTab() {
+qint8 ** SelectionTool::getSelectedTab() {
     return selectedTab;
 }
 

@@ -1,10 +1,12 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include "filters/filter.h"
+#include "filters/filtertool.h"
+#include "filters/colortool.h"
 #include "custommaskdialog.h"
 #include "selectiontool.h"
 #include "filtersmenu.h"
+#include "colormenu.h"
 
 #include <QMainWindow>
 #include <QGraphicsScene>
@@ -23,7 +25,7 @@ public:
     ~MainWindow();
 
 private slots:
-    void zoomChanged(int);
+    void zoomChanged(double);
     void sliderChanged(int);
 
     void openFileAction();
@@ -35,6 +37,8 @@ private slots:
     void lowPassFilter();
     void gaussFilter();
     void highPassFilter();
+
+    void colorFilter(int colorFilter);
 
     void thresholdSliderValueChanged(int value);
     void featherSliderValueChanged(int value);
@@ -60,11 +64,11 @@ private:
     QGraphicsPixmapItem *selectedAreaItem = nullptr;
     CustomMaskDialog *dialog = nullptr;
     FiltersMenu *filtersMenu = nullptr;
+    ColorMenu *colorMenu = nullptr;
     SelectionTool *selectTool = nullptr;
     QStack<stackNode> undoStack;
     QStack<stackNode> redoStack;
     QImage image;
-    Filter filter;
     QTimer timer;
 
     void createConnects();
