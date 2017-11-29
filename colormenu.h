@@ -12,7 +12,8 @@ class ColorMenu : public QDialog {
     Q_OBJECT
 
 signals:
-    void colorize(QColor color);
+    void colors(int H, int S, int V);
+    void brightnessContrast(int B, int C);
 
 public:
     explicit ColorMenu(int filterColor, QWidget *parent = 0);

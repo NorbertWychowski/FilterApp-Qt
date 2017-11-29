@@ -193,7 +193,7 @@ void MainWindow::highPassFilter() {
 
     QApplication::setOverrideCursor(Qt::ArrowCursor);
 }
-#include <QDebug>
+
 void MainWindow::colorFilter(int colorFilter) {
     QApplication::setOverrideCursor(Qt::BusyCursor);
 
@@ -217,8 +217,8 @@ void MainWindow::colorFilter(int colorFilter) {
         connect(colorMenu, &QDialog::rejected, this, [&, this]() {
             imageItem->setPixmap(QPixmap::fromImage(image));
         });
-        connect(colorMenu, &ColorMenu::colorize, this, [&, this](QColor color) {
-            imageItem->setPixmap(QPixmap::fromImage(ColorTool::colorize(color, image)));
+        connect(colorMenu, &ColorMenu::colors, this, [&, this](int H, int S, int V) {
+            imageItem->setPixmap(QPixmap::fromImage(ColorTool::colorize(H, S, V, image)));
         });
         connect(colorMenu, &ColorMenu::accepted, this, [&, this]() {
             image = imageItem->pixmap().toImage();
@@ -228,10 +228,32 @@ void MainWindow::colorFilter(int colorFilter) {
     case HUESATURATION:
         colorMenu = new ColorMenu(HUESATURATION, this);
         colorMenu->setWindowTitle("Barwa i nasycenie");
+
+        connect(colorMenu, &QDialog::rejected, this, [&, this]() {
+            imageItem->setPixmap(QPixmap::fromImage(image));
+        });
+        connect(colorMenu, &ColorMenu::colors, this, [&, this](int H, int S, int V) {
+            imageItem->setPixmap(QPixmap::fromImage(ColorTool::hueSaturation(H, S, V, image)));
+        });
+        connect(colorMenu, &ColorMenu::accepted, this, [&, this]() {
+            image = imageItem->pixmap().toImage();
+            imageItem->setPixmap(QPixmap::fromImage(image));
+        });
         break;
     case BRIGHTNESSCONTRAST:
         colorMenu = new ColorMenu(BRIGHTNESSCONTRAST, this);
         colorMenu->setWindowTitle("Jasność i kontrast");
+
+        connect(colorMenu, &QDialog::rejected, this, [&, this]() {
+            imageItem->setPixmap(QPixmap::fromImage(image));
+        });
+        connect(colorMenu, &ColorMenu::brightnessContrast, this, [&, this](int B, int C) {
+            imageItem->setPixmap(QPixmap::fromImage(ColorTool::brightnessContrast(B, C, image)));
+        });
+        connect(colorMenu, &ColorMenu::accepted, this, [&, this]() {
+            image = imageItem->pixmap().toImage();
+            imageItem->setPixmap(QPixmap::fromImage(image));
+        });
         break;
     }
 

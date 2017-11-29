@@ -65,24 +65,20 @@ QImage ColorTool::sepia(QImage img) {
 
     return tmp;
 }
-#include <QDebug>
-QImage ColorTool::colorize(QColor color, QImage img) {
+
+QImage ColorTool::colorize(int H, int S, int V, QImage img) {
     int maxThread = QThread::idealThreadCount();
     int width = img.width();
     int height = img.height();
 
-    int H, S, V;
-    color.getHsv(&H, &S, &V);
-    V -= 128;
-
     QImage tmp = img.copy();
     auto colorizeLambda = [&](int start, int end) {
         for(int y = start; y<end; ++y) {
-            //QRgb *line = (QRgb*)tmp.scanLine(y);
+            QRgb *line = (QRgb*)tmp.scanLine(y);
             for(int x = 0; x < width; ++x) {
-                //QColor c(line[x]);
-                int tmpV = qBound(0, tmp.pixelColor(x, y).value() + V, 255);
-                tmp.setPixelColor(x, y, QColor::fromHsv(H, S, tmpV));
+                QColor c(line[x]);
+                int tmpV = qBound(0, c.value() + V, 255);
+                line[x] = QColor::fromHsv(H, S, tmpV).rgb();
             }
         }
     };
@@ -92,6 +88,57 @@ QImage ColorTool::colorize(QColor color, QImage img) {
         futures.addFuture(QtConcurrent::run(colorizeLambda, i*height/maxThread, (i+1.0)*height/maxThread));
     }
     futures.waitForFinished();
+
+    return tmp;
+}
+
+QImage ColorTool::hueSaturation(int H, int S, int V, QImage img) {
+    int maxThread = QThread::idealThreadCount();
+    int width = img.width();
+    int height = img.height();
+
+    QImage tmp = img.copy();
+    auto saturation = [&](int start, int end) {
+        for(int y = start; y<end; ++y) {
+            QRgb *line = (QRgb*)tmp.scanLine(y);
+            for(int x = 0; x < width; ++x) {
+                QColor c(line[x]);
+                int newH = c.hue() + H;
+                if(newH > 359)
+                    newH %= 360;
+                else if (newH < 0)
+                    newH += 360;
+                line[x] = QColor::fromHsv(newH, qBound(0, c.saturation() + S, 255), qBound(0, c.value() + V, 255)).rgb();
+            }
+        }
+    };
+
+    QFutureSynchronizer<void> futures;
+    for(int i=0; i<maxThread; ++i) {
+        futures.addFuture(QtConcurrent::run(saturation, i*height/maxThread, (i+1.0)*height/maxThread));
+    }
+    futures.waitForFinished();
+
+    return tmp;
+}
+
+QImage ColorTool::brightnessContrast(int Br, int C, QImage img) {
+    double F = (259.0*(C + 255)) / (255.0 * (259 - C));
+    int width = img.width();
+    int height = img.height();
+
+    QImage tmp = img.copy();
+
+    for(int y = 0; y<height; ++y) {
+        QRgb* line = (QRgb*)tmp.scanLine(y);
+        for(int x = 0; x < width; ++x) {
+            int R = qBound(0.0, (F * (qRed(line[x]) - 128) + 128) + Br, 255.0);
+            int G = qBound(0.0, (F * (qGreen(line[x]) - 128) + 128) +  Br, 255.0);
+            int B = qBound(0.0, (F * (qBlue(line[x]) - 128) + 128) + Br, 255.0);
+
+            line[x] = qRgb(R, G, B);
+        }
+    }
 
     return tmp;
 }

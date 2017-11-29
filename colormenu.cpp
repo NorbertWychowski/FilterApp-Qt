@@ -42,13 +42,17 @@ ColorMenu::~ColorMenu() {
 void ColorMenu::draw() {
     switch(filterColor) {
     case COLORIZE:
-        emit colorize(QColor::fromHsv(ui->hueSlider->value(),
-                                      ui->saturationSlider->value(),
-                                      ui->valueSlider->value() + 128));
+        emit colors(ui->cHueSlider->value(),
+                    ui->cSaturationSlider->value()*2.55,
+                    ui->cValueSlider->value()*2.55);
         break;
     case HUESATURATION:
+        emit colors(ui->sHueSlider->value(),
+                    ui->sSaturationSlider->value()*2.55,
+                    ui->sValueSlider->value()*2.55);
         break;
     case BRIGHTNESSCONTRAST:
+        emit brightnessContrast(ui->brightnessSlider->value(), ui->contrastSlider->value());
         break;
     }
 
@@ -60,30 +64,78 @@ void ColorMenu::waitWithDraw() {
 }
 
 void ColorMenu::createConnects() {
-    connect(ui->saturationSlider, &QSlider::valueChanged, this, [this](int value) {
-        ui->saturationSpinBox->setValue(value);
-        waitWithDraw();
-    });
-    connect(ui->hueSlider, &QSlider::valueChanged, this, [this](int value) {
-        ui->hueSpinBox->setValue(value);
-        waitWithDraw();
-    });
-    connect(ui->valueSlider, &QSlider::valueChanged, this, [this](int value) {
-        ui->valueSpinBox->setValue(value);
-        waitWithDraw();
-    });
-    connect(ui->saturationSpinBox, QOverload<int>::of(&QSpinBox::valueChanged), this, [this](int value) {
-        ui->saturationSlider->setValue(value);
-        waitWithDraw();
-    });
-    connect(ui->hueSpinBox, QOverload<int>::of(&QSpinBox::valueChanged), this, [this](int value) {
-        ui->hueSlider->setValue(value);
-        waitWithDraw();
-    });
-    connect(ui->saturationSpinBox, QOverload<int>::of(&QSpinBox::valueChanged), this, [this](int value) {
-        ui->saturationSlider->setValue(value);
-        waitWithDraw();
-    });
+    switch(filterColor) {
+    case COLORIZE:
+        connect(ui->cSaturationSlider, &QSlider::valueChanged, this, [this](int value) {
+            ui->cSaturationSpinBox->setValue(value);
+            waitWithDraw();
+        });
+        connect(ui->cHueSlider, &QSlider::valueChanged, this, [this](int value) {
+            ui->cHueSpinBox->setValue(value);
+            waitWithDraw();
+        });
+        connect(ui->cValueSlider, &QSlider::valueChanged, this, [this](int value) {
+            ui->cValueSpinBox->setValue(value);
+            waitWithDraw();
+        });
+        connect(ui->cSaturationSpinBox, QOverload<int>::of(&QSpinBox::valueChanged), this, [this](int value) {
+            ui->cSaturationSlider->setValue(value);
+            waitWithDraw();
+        });
+        connect(ui->cHueSpinBox, QOverload<int>::of(&QSpinBox::valueChanged), this, [this](int value) {
+            ui->cHueSlider->setValue(value);
+            waitWithDraw();
+        });
+        connect(ui->cValueSpinBox, QOverload<int>::of(&QSpinBox::valueChanged), this, [this](int value) {
+            ui->cValueSlider->setValue(value);
+            waitWithDraw();
+        });
+        break;
+    case HUESATURATION:
+        connect(ui->sSaturationSlider, &QSlider::valueChanged, this, [this](int value) {
+            ui->sSaturationSpinBox->setValue(value);
+            waitWithDraw();
+        });
+        connect(ui->sHueSlider, &QSlider::valueChanged, this, [this](int value) {
+            ui->sHueSpinBox->setValue(value);
+            waitWithDraw();
+        });
+        connect(ui->sValueSlider, &QSlider::valueChanged, this, [this](int value) {
+            ui->sValueSpinBox->setValue(value);
+            waitWithDraw();
+        });
+        connect(ui->sSaturationSpinBox, QOverload<int>::of(&QSpinBox::valueChanged), this, [this](int value) {
+            ui->sSaturationSlider->setValue(value);
+            waitWithDraw();
+        });
+        connect(ui->sHueSpinBox, QOverload<int>::of(&QSpinBox::valueChanged), this, [this](int value) {
+            ui->sHueSlider->setValue(value);
+            waitWithDraw();
+        });
+        connect(ui->sValueSpinBox, QOverload<int>::of(&QSpinBox::valueChanged), this, [this](int value) {
+            ui->sValueSlider->setValue(value);
+            waitWithDraw();
+        });
+        break;
+    case BRIGHTNESSCONTRAST:
+        connect(ui->brightnessSlider, &QSlider::valueChanged, this, [this](int value) {
+            ui->brightnessSpinBox->setValue(value);
+            waitWithDraw();
+        });
+        connect(ui->contrastSlider, &QSlider::valueChanged, this, [this](int value) {
+            ui->contrastSpinBox->setValue(value);
+            waitWithDraw();
+        });
+        connect(ui->brightnessSpinBox, QOverload<int>::of(&QSpinBox::valueChanged), this, [this](int value) {
+            ui->brightnessSlider->setValue(value);
+            waitWithDraw();
+        });
+        connect(ui->contrastSpinBox, QOverload<int>::of(&QSpinBox::valueChanged), this, [this](int value) {
+            ui->contrastSlider->setValue(value);
+            waitWithDraw();
+        });
+        break;
+    }
 
     connect(timer, SIGNAL(timeout()), this, SLOT(draw()));
 }
