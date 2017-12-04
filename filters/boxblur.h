@@ -2,10 +2,11 @@
 #define BOXBLUR_H
 
 #include <QImage>
+#include <QProgressBar>
 
 class BoxBlur {
 public:
-    BoxBlur(const QImage &image);
+    BoxBlur(const QImage &image, QProgressBar *progressBar = nullptr);
     ~BoxBlur();
 
     QImage blur(int radius, qint8 **selectedTab = nullptr);
@@ -22,6 +23,7 @@ private:
     int _width;
     int _height;
     QImage image;
+    QProgressBar *progressBar;
 };
 
 #endif // BOXBLUR_H

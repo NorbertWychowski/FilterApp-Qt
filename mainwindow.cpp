@@ -19,7 +19,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     installEventFilter(this);
 
     selectTool = new SelectionTool(&image);
-
+    filterTool = new FilterTool;
 
     ui->featherSlider->setVisible(false);
     ui->featherSlider->setEnabled(false);
@@ -35,6 +35,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
 MainWindow::~MainWindow() {
     delete selectTool;
+    delete filterTool;
     delete imageItem;
     delete selectedAreaItem;
     delete scene;
@@ -106,11 +107,11 @@ void MainWindow::setCustomFilter(Matrix matrix) {
     redoStack.clear();
     if (isSelectMask) {
         undoStack.push({image, true});
-        image = FilterTool::splot(image, USER_FILTER, selectTool->getSelectedTab(), matrix);
+        image = filterTool->splot(image, USER_FILTER, selectTool->getSelectedTab(), matrix);
         selectedAreaItem->moveBy(-2, -2);
     } else {
         undoStack.push({image, false});
-        image = FilterTool::splot(image, USER_FILTER, matrix);
+        image = filterTool->splot(image, USER_FILTER, matrix);
     }
     imageItem->setPixmap(QPixmap::fromImage(image));
     selectTool->resizeSelectedTab();
@@ -124,11 +125,11 @@ void MainWindow::laplaceFilter() {
     redoStack.clear();
     if (isSelectMask) {
         undoStack.push({image, true});
-        image = FilterTool::splot(image, LAPLACE_FILTER, selectTool->getSelectedTab());
+        image = filterTool->splot(image, LAPLACE_FILTER, selectTool->getSelectedTab());
         selectedAreaItem->moveBy(-2, -2);
     } else {
         undoStack.push({image, false});
-        image = FilterTool::splot(image, LAPLACE_FILTER);
+        image = filterTool->splot(image, LAPLACE_FILTER);
     }
     imageItem->setPixmap(QPixmap::fromImage(image));
     selectTool->resizeSelectedTab();
@@ -145,11 +146,10 @@ void MainWindow::lowPassFilter() {
 
         undoStack.push({image, false});
         redoStack.clear();
-        if (isSelectMask) {
-            image = BoxBlur(image).blur(radius, selectTool->getSelectedTab());
-        } else {
-            image = BoxBlur(image).blur(radius);
-        }
+        if(isSelectMask)
+            image = filterTool->lowPassFilter(image, radius, selectTool->getSelectedTab());
+        else
+            image = filterTool->lowPassFilter(image, radius);
         imageItem->setPixmap(QPixmap::fromImage(image));
 
         QApplication::setOverrideCursor(Qt::ArrowCursor);
@@ -165,11 +165,10 @@ void MainWindow::gaussFilter() {
 
         undoStack.push({image, false});
         redoStack.clear();
-        if (isSelectMask) {
-            image = GaussianBlur(image).blur(radius, selectTool->getSelectedTab());
-        } else {
-            image = GaussianBlur(image).blur(radius);
-        }
+        if(isSelectMask)
+            image = filterTool->gaussianFilter(image, radius, selectTool->getSelectedTab());
+        else
+            image = filterTool->gaussianFilter(image, radius);
         imageItem->setPixmap(QPixmap::fromImage(image));
 
         QApplication::setOverrideCursor(Qt::ArrowCursor);
@@ -182,11 +181,11 @@ void MainWindow::highPassFilter() {
     redoStack.clear();
     if (isSelectMask) {
         undoStack.push({image, true});
-        image = FilterTool::splot(image, HIGHPASS_FILTER, selectTool->getSelectedTab());
+        image = filterTool->splot(image, HIGHPASS_FILTER, selectTool->getSelectedTab());
         selectedAreaItem->moveBy(-2, -2);
     } else {
         undoStack.push({image, false});
-        image = FilterTool::splot(image, HIGHPASS_FILTER);
+        image = filterTool->splot(image, HIGHPASS_FILTER);
     }
     imageItem->setPixmap(QPixmap::fromImage(image));
     selectTool->resizeSelectedTab();

@@ -64,6 +64,7 @@ private:
     QGraphicsPixmapItem *selectedAreaItem = nullptr;
     CustomMaskDialog *dialog = nullptr;
     FiltersMenu *filtersMenu = nullptr;
+    FilterTool *filterTool = nullptr;
     ColorMenu *colorMenu = nullptr;
     SelectionTool *selectTool = nullptr;
     QStack<stackNode> undoStack;

@@ -9,27 +9,13 @@
 QImage FilterTool::splot(QImage &img, FILTER choose, Matrix userKernel) {
     Matrix kernel;
     QImage res;
-    GaussianBlur *gaussianBlur = nullptr;
-    BoxBlur *boxBlur = nullptr;
 
     switch (choose) {
-    case LOWPASS_FILTER:
-        boxBlur = new BoxBlur(img);
-        res = boxBlur->blur(5);
-        delete boxBlur;
-        return res;
-        break;
     case LAPLACE_FILTER:
         kernel = Matrix::getLaplaceKernel();
         break;
     case HIGHPASS_FILTER:
         kernel = Matrix::getHighPassKernel();
-        break;
-    case GAUSSIAN_FILTER:
-        gaussianBlur = new GaussianBlur(img);
-        res =  gaussianBlur->blur(5);
-        delete gaussianBlur;
-        return res;
         break;
     case USER_FILTER:
         kernel = userKernel;
@@ -46,8 +32,6 @@ QImage FilterTool::splot(QImage &img, FILTER choose, Matrix userKernel) {
         img = img.convertToFormat(QImage::Format_RGB32);
 
     res = QImage(img.width() - N + 1, img.height() - N + 1, img.format());
-    int maxThreads = QThread::idealThreadCount();
-    QFutureSynchronizer<void> futures;
 
     auto f = [&](int start, int end) {
         int r = 0;
@@ -82,6 +66,9 @@ QImage FilterTool::splot(QImage &img, FILTER choose, Matrix userKernel) {
             }
         }
     };
+
+    int maxThreads = QThread::idealThreadCount();
+    QFutureSynchronizer<void> futures;
 
     for(int i=0; i<maxThreads; ++i)
         futures.addFuture(QtConcurrent::run(f, i*img.height()/maxThreads, (i+1)*img.height()/maxThreads));
@@ -178,4 +165,12 @@ QImage FilterTool::splot(QImage &img, FILTER choose, qint8 ** selectedTab, Matri
     futures.waitForFinished();
 
     return res;
+}
+
+QImage FilterTool::gaussianFilter(QImage &image, int radius, qint8 **selectedTab) {
+    return GaussianBlur(image).blur(radius, selectedTab);
+}
+
+QImage FilterTool::lowPassFilter(QImage &image, int radius, qint8 **selectedTab) {
+    return BoxBlur(image).blur(radius, selectedTab);
 }

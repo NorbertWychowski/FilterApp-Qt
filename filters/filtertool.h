@@ -4,6 +4,7 @@
 #include "math/matrix.h"
 #include <vector>
 #include <QImage>
+#include <QProgressBar>
 
 enum FILTER {
     GAUSSIAN_FILTER,
@@ -14,10 +15,12 @@ enum FILTER {
 };
 
 class FilterTool {
-public:
-    static QImage splot(QImage &img, FILTER choose, Matrix userKernel = Matrix());
-    static QImage splot(QImage &img, FILTER choose, qint8 **selectedTab, Matrix userKernel = Matrix());
 
+public:
+    QImage splot(QImage &img, FILTER choose, Matrix userKernel = Matrix());
+    QImage splot(QImage &img, FILTER choose, qint8 **selectedTab, Matrix userKernel = Matrix());
+    QImage gaussianFilter(QImage &image, int radius, qint8 **selectedTab = nullptr);
+    QImage lowPassFilter(QImage &image, int radius, qint8 **selectedTab = nullptr);
 };
 
 #endif // FILTER_H

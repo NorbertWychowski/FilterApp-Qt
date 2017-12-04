@@ -3,9 +3,11 @@
 #include <QtConcurrent/QtConcurrentRun>
 #include <QFutureSynchronizer>
 
-BoxBlur::BoxBlur(const QImage &image) {
+BoxBlur::BoxBlur(const QImage &image, QProgressBar *progressBar) {
     _width = image.width();
     _height = image.height();
+
+    this->progressBar = progressBar;
 
     _red = new int[_width*_height];
     _green = new int[_width*_height];

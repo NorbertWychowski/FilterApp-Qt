@@ -118,10 +118,10 @@ void FiltersMenu::initScene() {
 
 void FiltersMenu::radiusChanged(int radius) {
     switch(filter) {
-    case 1:
+    case GAUSSIAN_FILTER:
         blurredItem->setPixmap(QPixmap::fromImage(GaussianBlur(image.copy(x, y, width, height)).blur(radius)));
         break;
-    case 2:
+    case LOWPASS_FILTER:
         blurredItem->setPixmap(QPixmap::fromImage(BoxBlur(image.copy(x, y, width, height)).blur(radius)));
         break;
     }

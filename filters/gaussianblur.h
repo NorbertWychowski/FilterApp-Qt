@@ -7,20 +7,21 @@
  */
 
 #include <QImage>
+#include <QProgressBar>
 
 class GaussianBlur : public QObject {
     Q_OBJECT
 
 public:
-    GaussianBlur(const QImage &image);
+    GaussianBlur(const QImage &image, QProgressBar *progressBar = nullptr);
     ~GaussianBlur();
 
     QImage blur(int radius, qint8 **selectedTab = nullptr);
 
 private:
-    void gaussBlur_4(int* source, int* dest, int r);
+    void gaussBlur_4(int **source, int **dest, int sigma);
     int* boxesForGauss(double sigma, int n);
-    void boxBlur_4(int* source, int* dest, int w, int h, int r);
+    void boxBlur_4(int **source, int **dest, int w, int h, int r);
 
     int* _red;
     int* _green;
@@ -32,6 +33,7 @@ private:
     int _width;
     int _height;
     QImage image;
+    QProgressBar *progressBar;
 };
 
 #endif // GAUSSIANBLUR_H
