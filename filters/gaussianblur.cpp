@@ -51,18 +51,12 @@ QImage GaussianBlur::blur(int radius, qint8 **selectedTab) {
     newGreen = new int[_width * _height];
     newBlue = new int[_width * _height];
 
-    int sigma = qSqrt(-(radius * radius) / (2.0 * log(1.0 / 255.0)));
+    double sigma = qSqrt(-(radius * radius) / (2.0 * log(1.0 / 255.0)));
 
-    int **source2 = new int*[3];
-    source2[0] = _red;
-    source2[1] = _green;
-    source2[2] = _blue;
-    int **dest2 = new int*[3];
-    dest2[0] = newRed;
-    dest2[1] = newGreen;
-    dest2[2] = newBlue;
+    int *s[] = {_red, _green, _blue};
+    int *d[] = {newRed, newGreen, newBlue};
 
-    gaussBlur_4(source2, dest2, sigma);
+    gaussBlur_4(s, d, sigma);
 
     auto createImage = [&](int start, int end) {
         int row = start*_width;
@@ -94,20 +88,20 @@ QImage GaussianBlur::blur(int radius, qint8 **selectedTab) {
     return image;
 }
 
-void GaussianBlur::gaussBlur_4(int **source, int **dest, int sigma) {
-    int *bxs = boxesForGauss(sigma, 5);
+void GaussianBlur::gaussBlur_4(int **source, int **dest, double sigma) {
+    int *bxs = boxesForGauss(sigma, 3);
+    qDebug() << "2: " << ((bxs[0] + 1) / 2) << " " << ((bxs[1] + 1) / 2) << " " << ((bxs[2] + 1) / 2);
+
     boxBlur_4(source, dest, _width, _height, (bxs[0] - 1) / 2);
     boxBlur_4(dest, source, _width, _height, (bxs[1] - 1) / 2);
     boxBlur_4(source, dest, _width, _height, (bxs[2] - 1) / 2);
-    boxBlur_4(dest, source, _width, _height, (bxs[3] - 1) / 2);
-    boxBlur_4(source, dest, _width, _height, (bxs[4] - 1) / 2);
 }
 
 int *GaussianBlur::boxesForGauss(double sigma, int n) {
     double wIdeal = qSqrt((12.0 * sigma * sigma / n) + 1.0);
     int wl = qFloor(wIdeal);
     if (wl % 2 == 0) wl--;
-    int wu = (wl + 2);
+    int wu = wl + 2;
 
     double mIdeal = (12.0 * sigma * sigma - n * wl * wl - 4.0 * n * wl - 3.0 * n) / (-4.0 * wl - 4.0);
     int m = qRound(mIdeal);

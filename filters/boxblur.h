@@ -12,7 +12,7 @@ public:
     QImage blur(int radius, qint8 **selectedTab = nullptr);
 
 private:
-    void boxBlur(int *source, int *dest, int w, int h, int r);
+    void boxBlur(int **source, int **dest, int w, int h, int r);
 
     int *_red;
     int *_green;

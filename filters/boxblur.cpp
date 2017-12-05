@@ -56,9 +56,9 @@ QImage BoxBlur::blur(int radius, qint8 **selectedTab) {
     futures.waitForFinished();
     futures.clearFutures();
 
-    boxBlur(_red, newRed, _width, _height, radius);
-    boxBlur(_green, newGreen, _width, _height, radius);
-    boxBlur(_blue, newBlue, _width, _height, radius);
+    int *s[] = {_red, _green, _blue};
+    int *d[] = {newRed, newGreen, newBlue};
+    boxBlur(s, d, _width, _height, radius);
 
     auto createImage = [=](int start, int end) {
         int row = start*_width;
@@ -112,65 +112,93 @@ QImage BoxBlur::blur(int radius, qint8 **selectedTab) {
     return image;
 }
 
-void BoxBlur::boxBlur(int *source, int *dest, int w, int h, int r) {
+void BoxBlur::boxBlur(int **source, int **dest, int w, int h, int r) {
     double iar = 1.0 / (r + r + 1.0);
 
-    auto boxBlurH_4 = [=](int start, int end) {
-        int ti, li, ri, fv, lv, val;
+    auto boxBlurH_4 = [&](int start, int end) {
+        int ti, li, ri, fv[3], lv[3], val[3];
         for (int i = start; i < end; ++i) {
             ti = i * w;
             li = ti;
             ri = ti + r;
-            fv = dest[ti];
-            lv = dest[ti + w - 1];
-            val = (r + 1) * fv;
-            for (int j = 0; j < r; ++j) val += dest[ti + j];
+            for (int k=0; k<3; ++k) {
+                fv[k] = dest[k][ti];
+                lv[k] = dest[k][ti + w - 1];
+                val[k] = (r + 1) * fv[k];
+            }
+            for (int j = 0; j < r; ++j)
+                for (int k=0; k<3; ++k)
+                    val[k] += dest[k][ti + j];
             for (int j = 0; j <= r; ++j) {
-                val += dest[ri++] - fv;
-                source[ti++] = (int)round(val * iar);
+                for (int k=0; k<3; ++k) {
+                    val[k] += dest[k][ri] - fv[k];
+                    source[k][ti] = qRound(val[k] * iar);
+                }
+                ti++;
+                ri++;
             }
             for (int j = r + 1; j < w - r; ++j) {
-                val += dest[ri++] - dest[li++];
-                source[ti++] = (int)round(val * iar);
+                for (int k=0; k<3; ++k) {
+                    val[k] += dest[k][ri] - dest[k][li];
+                    source[k][ti] = qRound(val[k] * iar);
+                }
+                ri++;
+                ti++;
+                li++;
             }
             for (int j = w - r; j < w; ++j) {
-                val += lv - dest[li++];
-                source[ti++] = (int)round(val * iar);
+                for (int k=0; k<3; ++k) {
+                    val[k] += lv[k] - dest[k][li];
+                    source[k][ti] = qRound(val[k] * iar);
+                }
+                li++;
+                ti++;
             }
         }
     };
 
-    auto boxBlurT_4 = [=](int start, int end) {
-        int ti, li, ri, fv, lv, val;
+    auto boxBlurT_4 = [&](int start, int end) {
+        int ti, li, ri, fv[3], lv[3], val[3];
         for (int i = start; i < end; ++i) {
             ti = i;
             li = ti;
             ri = ti + r*w;
-            fv = source[ti];
-            lv = source[ti + w * (h - 1)];
-            val = (r + 1) * fv;
-            for (int j = 0; j<r; ++j) val += source[ti + j * w];
+            for (int k=0; k<3; ++k) {
+                fv[k] = source[k][ti];
+                lv[k] = source[k][ti + w * (h - 1)];
+                val[k] = (r + 1) * fv[k];
+            }
+            for (int j = 0; j<r; ++j)
+                for (int k=0; k<3; ++k)
+                    val[k] += source[k][ti + j * w];
             for (int j = 0; j <= r; ++j) {
-                val += source[ri] - fv;
-                dest[ti] = (int)round(val * iar);
+                for (int k=0; k<3; ++k) {
+                    val[k] += source[k][ri] - fv[k];
+                    dest[k][ti] = qRound(val[k] * iar);
+                }
                 ri += w;
                 ti += w;
             }
             for (int j = r + 1; j < h - r; ++j) {
-                val += source[ri] - source[li];
-                dest[ti] = (int)round(val * iar);
+                for (int k=0; k<3; ++k) {
+                    val[k] += source[k][ri] - source[k][li];
+                    dest[k][ti] = qRound(val[k] * iar);
+                }
                 li += w;
                 ri += w;
                 ti += w;
             }
             for (int j = h - r; j < h; ++j) {
-                val += lv - source[li];
-                dest[ti] = (int)round(val * iar);
+                for (int k=0; k<3; ++k) {
+                    val[k] += lv[k] - source[k][li];
+                    dest[k][ti] = qRound(val[k] * iar);
+                }
                 li += w;
                 ti += w;
             }
         }
     };
+
 
     QFutureSynchronizer<void> futures;
 

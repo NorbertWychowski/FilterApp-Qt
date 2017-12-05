@@ -19,7 +19,7 @@ public:
     QImage blur(int radius, qint8 **selectedTab = nullptr);
 
 private:
-    void gaussBlur_4(int **source, int **dest, int sigma);
+    void gaussBlur_4(int **source, int **dest, double sigma);
     int* boxesForGauss(double sigma, int n);
     void boxBlur_4(int **source, int **dest, int w, int h, int r);
 
