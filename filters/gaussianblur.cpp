@@ -90,7 +90,6 @@ QImage GaussianBlur::blur(int radius, qint8 **selectedTab) {
 
 void GaussianBlur::gaussBlur_4(int **source, int **dest, double sigma) {
     int *bxs = boxesForGauss(sigma, 3);
-    qDebug() << "2: " << ((bxs[0] + 1) / 2) << " " << ((bxs[1] + 1) / 2) << " " << ((bxs[2] + 1) / 2);
 
     boxBlur_4(source, dest, _width, _height, (bxs[0] - 1) / 2);
     boxBlur_4(dest, source, _width, _height, (bxs[1] - 1) / 2);

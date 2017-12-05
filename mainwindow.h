@@ -54,11 +54,6 @@ private:
 
     bool isSelectMask;
 
-    struct stackNode {
-        QImage image;
-        bool movedSelection;
-    };
-
     QGraphicsScene *scene = nullptr;
     QGraphicsPixmapItem *imageItem = nullptr;
     QGraphicsPixmapItem *selectedAreaItem = nullptr;
@@ -67,8 +62,8 @@ private:
     FilterTool *filterTool = nullptr;
     ColorMenu *colorMenu = nullptr;
     SelectionTool *selectTool = nullptr;
-    QStack<stackNode> undoStack;
-    QStack<stackNode> redoStack;
+    QStack<QImage> undoStack;
+    QStack<QImage> redoStack;
     QImage image;
     QTimer timer;
 

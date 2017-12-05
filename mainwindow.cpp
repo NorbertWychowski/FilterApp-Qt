@@ -13,6 +13,8 @@
 #include <QTimer>
 #include <QSignalMapper>
 
+#include <QDebug>
+
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
     ui->setupUi(this);
 
@@ -106,11 +108,11 @@ void MainWindow::setCustomFilter(Matrix matrix) {
 
     redoStack.clear();
     if (isSelectMask) {
-        undoStack.push({image, true});
+        undoStack.push(image);
         image = filterTool->splot(image, USER_FILTER, selectTool->getSelectedTab(), matrix);
         selectedAreaItem->moveBy(-2, -2);
     } else {
-        undoStack.push({image, false});
+        undoStack.push(image);
         image = filterTool->splot(image, USER_FILTER, matrix);
     }
     imageItem->setPixmap(QPixmap::fromImage(image));
@@ -124,11 +126,11 @@ void MainWindow::laplaceFilter() {
 
     redoStack.clear();
     if (isSelectMask) {
-        undoStack.push({image, true});
+        undoStack.push(image);
         image = filterTool->splot(image, LAPLACE_FILTER, selectTool->getSelectedTab());
         selectedAreaItem->moveBy(-2, -2);
     } else {
-        undoStack.push({image, false});
+        undoStack.push(image);
         image = filterTool->splot(image, LAPLACE_FILTER);
     }
     imageItem->setPixmap(QPixmap::fromImage(image));
@@ -144,7 +146,7 @@ void MainWindow::lowPassFilter() {
     connect(filtersMenu, &FiltersMenu::blurRadius, this, [&](int radius) {
         QApplication::setOverrideCursor(Qt::BusyCursor);
 
-        undoStack.push({image, false});
+        undoStack.push(image);
         redoStack.clear();
         if(isSelectMask)
             image = filterTool->lowPassFilter(image, radius, selectTool->getSelectedTab());
@@ -163,7 +165,7 @@ void MainWindow::gaussFilter() {
     connect(filtersMenu, &FiltersMenu::blurRadius, this, [&](int radius) {
         QApplication::setOverrideCursor(Qt::BusyCursor);
 
-        undoStack.push({image, false});
+        undoStack.push(image);
         redoStack.clear();
         if(isSelectMask)
             image = filterTool->gaussianFilter(image, radius, selectTool->getSelectedTab());
@@ -180,11 +182,11 @@ void MainWindow::highPassFilter() {
 
     redoStack.clear();
     if (isSelectMask) {
-        undoStack.push({image, true});
+        undoStack.push(image);
         image = filterTool->splot(image, HIGHPASS_FILTER, selectTool->getSelectedTab());
         selectedAreaItem->moveBy(-2, -2);
     } else {
-        undoStack.push({image, false});
+        undoStack.push(image);
         image = filterTool->splot(image, HIGHPASS_FILTER);
     }
     imageItem->setPixmap(QPixmap::fromImage(image));
@@ -197,7 +199,7 @@ void MainWindow::colorFilter(int colorFilter) {
     QApplication::setOverrideCursor(Qt::BusyCursor);
 
     redoStack.clear();
-    undoStack.push({image, true});
+    undoStack.push(image);
 
     switch(colorFilter) {
     case NEGATIVE:
@@ -264,26 +266,30 @@ void MainWindow::colorFilter(int colorFilter) {
 void MainWindow::keyPressEvent(QKeyEvent *event) {
     if((event->key() == Qt::Key_Z) && (QGuiApplication::keyboardModifiers() & Qt::ControlModifier)) {
         if(!undoStack.isEmpty()) {
-            stackNode tmp = undoStack.pop();
-            redoStack.push({ image, tmp.movedSelection });
-            image = tmp.image;
+            QImage tmp = undoStack.pop();
+            redoStack.push(image);
+            image = tmp.copy();
             imageItem->setPixmap(QPixmap::fromImage(image));
-            selectTool->resizeSelectedTab();
 
-            if(tmp.movedSelection)
-                selectedAreaItem->moveBy(2, 2);
+            selectTool->resizeSelectedTab();
+            scene->removeItem(selectedAreaItem);
+            selectedAreaItem = new QGraphicsPixmapItem();
+            scene->addItem(selectedAreaItem);
+
+            isSelectMask = false;
         }
     }
     if((event->key() == Qt::Key_Y) && (QGuiApplication::keyboardModifiers() & Qt::ControlModifier)) {
         if(!redoStack.isEmpty()) {
-            stackNode tmp = redoStack.pop();
-            undoStack.push({ image, tmp.movedSelection });
-            image = tmp.image;
+            QImage tmp = redoStack.pop();
+            undoStack.push(image);
+            image = tmp.copy();
             imageItem->setPixmap(QPixmap::fromImage(image));
-            selectTool->resizeSelectedTab();
 
-            if(tmp.movedSelection)
-                selectedAreaItem->moveBy(-2, -2);
+            selectTool->resizeSelectedTab();
+            scene->removeItem(selectedAreaItem);
+            selectedAreaItem = new QGraphicsPixmapItem();
+            scene->addItem(selectedAreaItem);
         }
     }
 }

@@ -81,27 +81,13 @@ QImage FilterTool::splot(QImage &img, FILTER choose, Matrix userKernel) {
 QImage FilterTool::splot(QImage &img, FILTER choose, qint8 ** selectedTab, Matrix userKernel) {
     Matrix kernel;
     QImage res;
-    GaussianBlur *gaussianBlur = nullptr;
-    BoxBlur *boxBlur = nullptr;
 
     switch (choose) {
-    case LOWPASS_FILTER:
-        boxBlur = new BoxBlur(img);
-        res = boxBlur->blur(5, selectedTab);
-        delete boxBlur;
-        return res;
-        break;
     case LAPLACE_FILTER:
         kernel = Matrix::getLaplaceKernel();
         break;
     case HIGHPASS_FILTER:
         kernel = Matrix::getHighPassKernel();
-        break;
-    case GAUSSIAN_FILTER:
-        gaussianBlur = new GaussianBlur(img);
-        res =  gaussianBlur->blur(5, selectedTab);
-        delete gaussianBlur;
-        return res;
         break;
     case USER_FILTER:
         kernel = userKernel;
