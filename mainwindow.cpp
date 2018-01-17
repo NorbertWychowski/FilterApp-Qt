@@ -79,18 +79,19 @@ void MainWindow::sliderChanged(int value) {
 void MainWindow::openFileAction() {
     QString file = QFileDialog::getOpenFileName(this, tr("Otwórz"), "C://", tr("Wszystkie pliki (*.*);;"
                    "JPEG (*.jpg *jpeg);; PNG (*.png)"), &QString(tr("Wszystkie pliki (*.*)")));
+    if(!file.isEmpty()) {
+        image.load(file);
+        if (image.format() != QImage::Format_RGB32)
+            image = image.convertToFormat(QImage::Format_RGB32);
 
-    image.load(file);
-    if (image.format() != QImage::Format_RGB32)
-        image = image.convertToFormat(QImage::Format_RGB32);
+        undoStack.clear();
 
-    undoStack.clear();
+        selectTool->resizeSelectedTab();
+        selectedAreaItem->setPixmap(QPixmap());
 
-    selectTool->resizeSelectedTab();
-    selectedAreaItem->setPixmap(QPixmap());
-
-    imageItem->setPixmap(QPixmap::fromImage(image));
-    scene->setSceneRect(image.rect());
+        imageItem->setPixmap(QPixmap::fromImage(image));
+        scene->setSceneRect(image.rect());
+    }
 }
 
 void MainWindow::saveFileAction() {
@@ -341,6 +342,7 @@ void MainWindow::selectByColorButtonClicked(bool b) {
     ui->toolsOptions->setEnabled(b);
 
     selectedAreaItem->setPixmap(QPixmap());
+    ui->graphicsView->disableRectSelect();
 
     if (!b) {
         isSelectMask = false;
@@ -428,7 +430,7 @@ void MainWindow::createConnects() {
     connect(ui->featherSlider,      SIGNAL(valueChanged(int)),  this, SLOT(featherSliderValueChanged(int)));
     connect(ui->featherCheckBox,    SIGNAL(clicked(bool)),      this, SLOT(featherCheckBoxChanged(bool)));
     //wybor zaznaczenia i utworzenie jego maski
-    connect(ui->selectByColorButton,  SIGNAL(clicked(bool)),    this, SLOT(selectByColorButtonClicked(bool)));
+    connect(ui->selectByColorButton,SIGNAL(clicked(bool)),      this, SLOT(selectByColorButtonClicked(bool)));
     connect(ui->rectangleSelectButton,SIGNAL(clicked(bool)),    this, SLOT(rectangleSelectButtonClicked(bool)));
     connect(ui->graphicsView,       SIGNAL(selectedArea(QRect)),this, SLOT(rectangleSelection(QRect)));
     //zmiana koloru zaznaczenia co 0.5s

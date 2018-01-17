@@ -6,9 +6,9 @@
 
 class LabConverter {
 public:
-    static qreal compareColors(QColor &A, QColor &B);
+    static qreal compareColors(const QColor &A, const QColor &B);
 
-    static std::array<qreal, 3> toLAB(QColor &color);
+    static std::array<qreal, 3> toLAB(const QColor &color);
 };
 
 #endif // LABCONVERTER_H

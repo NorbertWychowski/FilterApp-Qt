@@ -106,9 +106,9 @@ int *GaussianBlur::boxesForGauss(double sigma, int n) {
     int m = qRound(mIdeal);
 
     int *sizes = new int[n];
-    for (int i = 0; i < n; i++) {
+    for (int i = 0; i < n; i++)
         sizes[i] = (i < m ? wl : wu);
-    }
+
     return sizes;
 }
 

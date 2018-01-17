@@ -2,13 +2,13 @@
 
 #include <QtMath>
 
-qreal LabConverter::compareColors(QColor &A, QColor &B) {
+qreal LabConverter::compareColors(const QColor &A, const QColor &B) {
     std::array<qreal, 3> lab1 = toLAB(A);
     std::array<qreal, 3> lab2 = toLAB(B);
     return qSqrt(qPow(lab2[0] - lab1[0], 2) + qPow(lab2[1] - lab1[1], 2) + qPow(lab2[2] - lab1[2], 2));;
 }
 
-std::array<qreal, 3> LabConverter::toLAB(QColor &color) {
+std::array<qreal, 3> LabConverter::toLAB(const QColor &color) {
     //RGB to XYZ
     qreal r, g, b, X, Y, Z, fx, fy, fz, xr, yr, zr;
     r = color.red() / 255.0;
