@@ -85,6 +85,7 @@ void MainWindow::openFileAction() {
             image = image.convertToFormat(QImage::Format_RGB32);
 
         undoStack.clear();
+        redoStack.clear();
 
         selectTool->resizeSelectedTab();
         selectedAreaItem->setPixmap(QPixmap());

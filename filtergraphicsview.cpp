@@ -6,6 +6,7 @@
 
 FilterGraphicsView::FilterGraphicsView(QWidget *parent) : QGraphicsView(parent) { }
 
+
 void FilterGraphicsView::mousePressEvent(QMouseEvent *event) {
     QApplication::setOverrideCursor(Qt::ClosedHandCursor);
 
