@@ -13,8 +13,6 @@
 #include <QTimer>
 #include <QSignalMapper>
 
-#include <QDebug>
-
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
     ui->setupUi(this);
 
@@ -195,6 +193,10 @@ void MainWindow::highPassFilter() {
     selectTool->resizeSelectedTab();
 
     QApplication::setOverrideCursor(Qt::ArrowCursor);
+}
+
+void MainWindow::showHistogram() {
+    histogram = new Histogram(image, this);
 }
 
 void MainWindow::colorFilter(int colorFilter) {
@@ -407,6 +409,9 @@ void MainWindow::createConnects() {
     connect(ui->actionLowPass,      SIGNAL(triggered(bool)),    this, SLOT(lowPassFilter()));
     connect(ui->actionGauss,        SIGNAL(triggered(bool)),    this, SLOT(gaussFilter()));
     connect(ui->actionHighPass,     SIGNAL(triggered(bool)),    this, SLOT(highPassFilter()));
+
+    connect(ui->actionHistogram,    SIGNAL(triggered(bool)),    this, SLOT(showHistogram()));
+
     //filtry koloru
     QSignalMapper *signalMapper = new QSignalMapper(this);
 

@@ -10,6 +10,12 @@
     <height>900</height>
    </rect>
   </property>
+  <property name="baseSize">
+   <size>
+    <width>10</width>
+    <height>10</height>
+   </size>
+  </property>
   <property name="windowTitle">
    <string>Filter App</string>
   </property>
@@ -418,9 +424,16 @@ QSlider::sub-page:horizontal {
     <addaction name="actionSepia"/>
     <addaction name="actionDesaturate"/>
    </widget>
+   <widget class="QMenu" name="menuNarz_dzia">
+    <property name="title">
+     <string>Narzędzia</string>
+    </property>
+    <addaction name="actionHistogram"/>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuFiltry"/>
    <addaction name="menuKolory"/>
+   <addaction name="menuNarz_dzia"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <action name="actionOpen">
@@ -486,6 +499,11 @@ QSlider::sub-page:horizontal {
   <action name="actionDesaturate">
    <property name="text">
     <string>Desaturacja</string>
+   </property>
+  </action>
+  <action name="actionHistogram">
+   <property name="text">
+    <string>Histogram</string>
    </property>
   </action>
  </widget>

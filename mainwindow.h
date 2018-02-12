@@ -1,6 +1,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include "tools/histogram.h"
 #include "filters/filtertool.h"
 #include "filters/colortool.h"
 #include "custommaskdialog.h"
@@ -38,6 +39,8 @@ private slots:
     void gaussFilter();
     void highPassFilter();
 
+    void showHistogram();
+
     void colorFilter(int colorFilter);
 
     void thresholdSliderValueChanged(int value);
@@ -60,6 +63,7 @@ private:
     CustomMaskDialog *dialog = nullptr;
     FiltersMenu *filtersMenu = nullptr;
     FilterTool *filterTool = nullptr;
+    Histogram *histogram = nullptr;
     ColorMenu *colorMenu = nullptr;
     SelectionTool *selectTool = nullptr;
     QStack<QImage> undoStack;
