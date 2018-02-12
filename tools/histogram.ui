@@ -45,6 +45,11 @@
        <string>Niebieski</string>
       </property>
      </item>
+     <item>
+      <property name="text">
+       <string>RGB</string>
+      </property>
+     </item>
     </widget>
    </item>
   </layout>

@@ -2,7 +2,7 @@
 #include "ui_histogram.h"
 
 #include <QLegendMarker>
-#include <QDebug>
+
 Histogram::Histogram(QImage &image, QWidget *parent) : QDialog(parent), ui(new Ui::Histogram) {
     ui->setupUi(this);
     setAttribute(Qt::WA_DeleteOnClose);
@@ -87,26 +87,46 @@ Histogram::~Histogram() {
 }
 
 void Histogram::changeHistogram(int index) {
-    seriesValue->setVisible(false);
-    seriesRed->setVisible(false);
-    seriesGreen->setVisible(false);
-    seriesBlue->setVisible(false);
-
     switch(index) {
     case 0:
         seriesValue->setVisible(true);
+        seriesRed->setVisible(false);
+        seriesGreen->setVisible(false);
+        seriesBlue->setVisible(false);
+
         chart->legend()->markers(seriesValue)[0]->setVisible(false);
         break;
     case 1:
+        seriesValue->setVisible(false);
         seriesRed->setVisible(true);
+        seriesGreen->setVisible(false);
+        seriesBlue->setVisible(false);
+
         chart->legend()->markers(seriesRed)[0]->setVisible(false);
         break;
     case 2:
+        seriesValue->setVisible(false);
+        seriesRed->setVisible(false);
         seriesGreen->setVisible(true);
+        seriesBlue->setVisible(false);
+
         chart->legend()->markers(seriesGreen)[0]->setVisible(false);
         break;
     case 3:
+        seriesValue->setVisible(false);
+        seriesRed->setVisible(false);
+        seriesGreen->setVisible(false);
         seriesBlue->setVisible(true);
+
+        chart->legend()->markers(seriesBlue)[0]->setVisible(false);
+        break;
+    case 4:
+        seriesRed->setVisible(true);
+        seriesGreen->setVisible(true);
+        seriesBlue->setVisible(true);
+
+        chart->legend()->markers(seriesRed)[0]->setVisible(false);
+        chart->legend()->markers(seriesGreen)[0]->setVisible(false);
         chart->legend()->markers(seriesBlue)[0]->setVisible(false);
         break;
     }
