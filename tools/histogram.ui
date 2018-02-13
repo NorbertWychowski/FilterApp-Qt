@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>600</width>
-    <height>400</height>
+    <width>900</width>
+    <height>500</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -22,37 +22,7 @@
   <property name="modal">
    <bool>true</bool>
   </property>
-  <layout class="QGridLayout" name="gridLayout">
-   <item row="0" column="0">
-    <widget class="QComboBox" name="comboBox">
-     <item>
-      <property name="text">
-       <string>Wartość</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>Czerwony</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>Zielony</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>Niebieski</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>RGB</string>
-      </property>
-     </item>
-    </widget>
-   </item>
-  </layout>
+  <layout class="QGridLayout" name="gridLayout"/>
  </widget>
  <resources/>
  <connections/>

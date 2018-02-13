@@ -196,7 +196,8 @@ void MainWindow::highPassFilter() {
 }
 
 void MainWindow::showHistogram() {
-    histogram = new Histogram(image, this);
+    if(!image.isNull())
+        histogram = new Histogram(image, this);
 }
 
 void MainWindow::colorFilter(int colorFilter) {

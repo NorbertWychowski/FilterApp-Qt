@@ -2,11 +2,12 @@
 #define HISTOGRAM_H
 
 #include <QDialog>
-#include <QtCharts/QChartView>
-#include <QtCharts/QBarSeries>
-#include <QtCharts/QBarSet>
-#include <QtCharts/QLegend>
-#include <QtCharts/QBarCategoryAxis>
+#include <QChartView>
+#include <QBarSeries>
+#include <QBarSet>
+#include <QLegend>
+#include <QBarCategoryAxis>
+#include <QValueAxis>
 
 QT_CHARTS_USE_NAMESPACE
 
@@ -22,20 +23,19 @@ public:
     ~Histogram();
 
 private slots:
-    void changeHistogram(int index);
+    void changeHistogram();
+    void resizeEvent(QResizeEvent *e);
 
 private:
-    QBarSet *valueData;
-    QBarSet *redData;
-    QBarSet *greenData;
-    QBarSet *blueData;
-    QBarSeries *seriesValue;
-    QBarSeries *seriesRed;
-    QBarSeries *seriesGreen;
-    QBarSeries *seriesBlue;
+    void createChart(QImage &image);
+    void createConnects();
+
+    QVector<QBarSet *> data;
+    QVector<QBarSeries *> series;
 
     QChart *chart;
     QChartView *chartView;
+    QValueAxis *axisY;
 
     int value[256];
     int red[256];

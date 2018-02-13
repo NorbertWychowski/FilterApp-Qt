@@ -1,84 +1,28 @@
 #include "histogram.h"
 #include "ui_histogram.h"
 
+#include <QtConcurrent/QtConcurrentRun>
+#include <QFutureSynchronizer>
 #include <QLegendMarker>
 
 Histogram::Histogram(QImage &image, QWidget *parent) : QDialog(parent), ui(new Ui::Histogram) {
     ui->setupUi(this);
     setAttribute(Qt::WA_DeleteOnClose);
 
-    chart = new QChart();
-
-    for(int i = 0; i < 256; i++)
-        value[i] = red[i] = green[i] = blue[i] = 0;
-
-    for(int y = 0; y < image.height(); y++) {
-        QRgb *line = (QRgb*)image.scanLine(y);
-
-        for(int x = 0; x < image.width(); x++) {
-            QColor color = QColor(line[x]);
-            value[color.value()]++;
-            red[color.red()]++;
-            green[color.green()]++;
-            blue[color.blue()]++;
-        }
+    if(!image.isNull()) {
+        createChart(image);
+        createConnects();
+        qDebug() << "test";
     }
-    valueData = new QBarSet("", chart);
-    redData = new QBarSet("", chart);
-    greenData = new QBarSet("", chart);
-    blueData = new QBarSet("", chart);
-
-    valueData->setPen(QColor(Qt::black));
-    valueData->setBrush(Qt::black);
-    redData->setPen(QColor(Qt::red));
-    redData->setBrush(Qt::red);
-    greenData->setPen(QColor(Qt::green));
-    greenData->setBrush(Qt::green);
-    blueData->setPen(QColor(Qt::blue));
-    blueData->setBrush(Qt::blue);
-
-    for(int i = 0; i < 256; i++) {
-        *valueData << value[i];
-        *redData << red[i];
-        *greenData << green[i];
-        *blueData << blue[i];
-    }
-
-    seriesValue = new QBarSeries(chart);
-    seriesRed = new QBarSeries(chart);
-    seriesGreen = new QBarSeries(chart);
-    seriesBlue = new QBarSeries(chart);
-    seriesValue->append(valueData);
-    seriesRed->append(redData);
-    seriesGreen->append(greenData);
-    seriesBlue->append(blueData);
-
-    chart->addSeries(seriesValue);
-    chart->addSeries(seriesRed);
-    chart->addSeries(seriesGreen);
-    chart->addSeries(seriesBlue);
-
-    chart->legend()->markers(seriesValue)[0]->setVisible(false);
-    chart->legend()->markers(seriesRed)[0]->setVisible(false);
-    chart->legend()->markers(seriesGreen)[0]->setVisible(false);
-    chart->legend()->markers(seriesBlue)[0]->setVisible(false);
-
-    seriesValue->setVisible(true);
-    seriesRed->setVisible(false);
-    seriesGreen->setVisible(false);
-    seriesBlue->setVisible(false);
-
-    chartView = new QChartView(chart);
-    chartView->setRenderHint(QPainter::Antialiasing);
-
-    ui->gridLayout->addWidget(chartView, 1, 0, 1, 1);
 
     raise();
     setFocus();
     show();
     activateWindow();
 
-    connect(ui->comboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(changeHistogram(int)));
+    double width = chart->size().width() / 256.0;
+    for(QBarSeries *s : series)
+        s->setBarWidth(width < 1.0 ? 1.0 : width);
 }
 
 Histogram::~Histogram() {
@@ -86,48 +30,130 @@ Histogram::~Histogram() {
     delete ui;
 }
 
-void Histogram::changeHistogram(int index) {
-    switch(index) {
-    case 0:
-        seriesValue->setVisible(true);
-        seriesRed->setVisible(false);
-        seriesGreen->setVisible(false);
-        seriesBlue->setVisible(false);
+void Histogram::changeHistogram() {
+    QLegendMarker *marker = qobject_cast<QLegendMarker *> (sender());
+    Q_ASSERT(marker);
 
-        chart->legend()->markers(seriesValue)[0]->setVisible(false);
-        break;
-    case 1:
-        seriesValue->setVisible(false);
-        seriesRed->setVisible(true);
-        seriesGreen->setVisible(false);
-        seriesBlue->setVisible(false);
+    Qt::GlobalColor color[] = {Qt::black, Qt::red, Qt::green, Qt::blue};
 
-        chart->legend()->markers(seriesRed)[0]->setVisible(false);
-        break;
-    case 2:
-        seriesValue->setVisible(false);
-        seriesRed->setVisible(false);
-        seriesGreen->setVisible(true);
-        seriesBlue->setVisible(false);
+    switch(marker->type()) {
+    case QLegendMarker::LegendMarkerTypeBar:
+        marker->series()->setVisible(!marker->series()->isVisible());
+        marker->setVisible(true);
 
-        chart->legend()->markers(seriesGreen)[0]->setVisible(false);
+        if(marker->series()->isVisible()) {
+            if(chart->series().indexOf(marker->series()) != -1)
+                marker->setBrush(color[chart->series().indexOf(marker->series())]);
+        } else marker->setBrush(Qt::white);
         break;
-    case 3:
-        seriesValue->setVisible(false);
-        seriesRed->setVisible(false);
-        seriesGreen->setVisible(false);
-        seriesBlue->setVisible(true);
+    default:
+        break;
+    }
 
-        chart->legend()->markers(seriesBlue)[0]->setVisible(false);
-        break;
-    case 4:
-        seriesRed->setVisible(true);
-        seriesGreen->setVisible(true);
-        seriesBlue->setVisible(true);
+    bool active[4] = {false};
+    for(int i = 0; i < 4; i++)
+        active[i] = series[i]->isVisible();
 
-        chart->legend()->markers(seriesRed)[0]->setVisible(false);
-        chart->legend()->markers(seriesGreen)[0]->setVisible(false);
-        chart->legend()->markers(seriesBlue)[0]->setVisible(false);
-        break;
+    int max = 0;
+    for(int i = 0; i < 256; i++) {
+        if(active[0])
+            if(value[i] > max) max = value[i];
+        if(active[1])
+            if(red[i] > max) max = red[i];
+        if(active[2])
+            if(green[i] > max) max = green[i];
+        if(active[3])
+            if(blue[i] > max) max = blue[i];
+    }
+
+    axisY->setRange(0, max);
+}
+
+void Histogram::resizeEvent(QResizeEvent *e) {
+    double width = chart->size().width() / 256.0;
+    for(int i = 0; i < 4; i++)
+        series[i]->setBarWidth(width < 1.0 ? 1.0 : width);
+}
+
+void Histogram::createChart(QImage &image) {
+    int maxThreads = QThread::idealThreadCount();
+    QFutureSynchronizer<void> futures;
+
+    chart = new QChart();
+    chartView = new QChartView(chart);
+    chartView->setRenderHint(QPainter::Antialiasing);
+
+    for(int i = 0; i < 256; i++)
+        value[i] = red[i] = green[i] = blue[i] = 0;
+
+    auto loadData = [&](int start, int end) {
+        for(int y = start; y < end; y++) {
+            QRgb *line = (QRgb*)image.scanLine(y);
+
+            for(int x = 0; x < image.width(); x++) {
+                QColor color = QColor(line[x]);
+                value[color.value()]++;
+                red[color.red()]++;
+                green[color.green()]++;
+                blue[color.blue()]++;
+            }
+        }
+    };
+
+    int h = image.height() / maxThreads;
+    for (int i = 0; i<maxThreads; ++i)
+        futures.addFuture(QtConcurrent::run(loadData, i * h, (i + 1) * h));
+
+    futures.waitForFinished();
+    futures.clearFutures();
+
+    for(int i = 0; i < 4; i++)
+        data.push_back(new QBarSet("", chart));
+
+    data[0]->setPen(QColor(Qt::black));
+    data[0]->setBrush(Qt::black);
+    data[1]->setPen(QColor(Qt::red));
+    data[1]->setBrush(Qt::red);
+    data[2]->setPen(QColor(Qt::green));
+    data[2]->setBrush(Qt::green);
+    data[3]->setPen(QColor(Qt::blue));
+    data[3]->setBrush(Qt::blue);
+
+    int max = value[0];
+    for(int i = 0; i < 256; i++) {
+        if(value[i] > max) max = value[i];
+
+        *data[0] << value[i];
+        *data[1] << red[i];
+        *data[2] << green[i];
+        *data[3] << blue[i];
+    }
+
+    axisY = new QValueAxis();
+    axisY->setRange(0, max);
+    axisY->setLabelsVisible(false);
+
+    for(int i = 0; i < 4; i++) {
+        series.push_back(new QBarSeries(chart));
+        series[i]->append(data[i]);
+        chart->addSeries(series[i]);
+        chart->setAxisY(axisY, series[i]);
+
+        if(i == 0) continue;
+        series[i]->setVisible(false);
+    }
+
+    for(int i = 1; i < chart->legend()->markers().size(); i++) {
+        chart->legend()->markers().at(i)->setVisible(true);
+        chart->legend()->markers().at(i)->setBrush(Qt::white);
+    }
+
+    ui->gridLayout->addWidget(chartView, 0, 0, 1, 1);
+}
+
+void Histogram::createConnects() {
+    for(QLegendMarker *marker : chart->legend()->markers()) {
+        disconnect(marker, SIGNAL(clicked()), this, SLOT(changeHistogram()));
+        connect(marker, SIGNAL(clicked()), this, SLOT(changeHistogram()));
     }
 }
