@@ -22,7 +22,7 @@
   <widget class="QWidget" name="centralWidget">
    <layout class="QGridLayout" name="gridLayout">
     <item row="1" column="2">
-     <widget class="QLabel" name="label">
+     <widget class="QLabel" name="zoomLabel">
       <property name="sizePolicy">
        <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
         <horstretch>0</horstretch>
@@ -35,7 +35,7 @@
      </widget>
     </item>
     <item row="1" column="3">
-     <widget class="QSlider" name="horizontalSlider">
+     <widget class="QSlider" name="zoomSlider">
       <property name="sizePolicy">
        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
         <horstretch>0</horstretch>
@@ -52,13 +52,13 @@
        <number>1</number>
       </property>
       <property name="maximum">
-       <number>11</number>
+       <number>1</number>
       </property>
       <property name="pageStep">
        <number>1</number>
       </property>
       <property name="value">
-       <number>4</number>
+       <number>1</number>
       </property>
       <property name="orientation">
        <enum>Qt::Horizontal</enum>
@@ -96,7 +96,7 @@
        <enum>QFrame::Sunken</enum>
       </property>
       <layout class="QGridLayout" name="gridLayout_2">
-       <item row="2" column="0" colspan="2">
+       <item row="3" column="0" colspan="2">
         <spacer name="verticalSpacer">
          <property name="orientation">
           <enum>Qt::Vertical</enum>
@@ -109,15 +109,15 @@
          </property>
         </spacer>
        </item>
-       <item row="3" column="0" colspan="2">
+       <item row="4" column="0" colspan="2">
         <widget class="QTabWidget" name="toolsOptions">
          <property name="enabled">
           <bool>true</bool>
          </property>
          <property name="currentIndex">
-          <number>0</number>
+          <number>1</number>
          </property>
-         <widget class="QWidget" name="tab">
+         <widget class="QWidget" name="selectByColorTab">
           <attribute name="title">
            <string>Narzędzia</string>
           </attribute>
@@ -188,7 +188,7 @@ QSlider::sub-page:horizontal {
              </property>
              <property name="minimumSize">
               <size>
-               <width>20</width>
+               <width>25</width>
                <height>0</height>
               </size>
              </property>
@@ -213,7 +213,7 @@ QSlider::sub-page:horizontal {
              </property>
              <property name="minimumSize">
               <size>
-               <width>21</width>
+               <width>25</width>
                <height>0</height>
               </size>
              </property>
@@ -325,38 +325,157 @@ QSlider::sub-page:horizontal {
            </item>
           </layout>
          </widget>
-        </widget>
-       </item>
-       <item row="1" column="0" colspan="2">
-        <widget class="QPushButton" name="selectByColorButton">
-         <property name="text">
-          <string>Magiczna Różdzka</string>
-         </property>
-         <property name="checkable">
-          <bool>true</bool>
-         </property>
-         <property name="autoRepeat">
-          <bool>false</bool>
-         </property>
-         <property name="autoExclusive">
-          <bool>false</bool>
-         </property>
-         <property name="autoDefault">
-          <bool>false</bool>
-         </property>
+         <widget class="QWidget" name="brushTab">
+          <attribute name="title">
+           <string>Narzędzia</string>
+          </attribute>
+          <layout class="QGridLayout" name="gridLayout_4">
+           <item row="2" column="0">
+            <widget class="QLabel" name="label_4">
+             <property name="text">
+              <string>Kolor</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="1">
+            <widget class="QLabel" name="brushSizeLabel">
+             <property name="minimumSize">
+              <size>
+               <width>25</width>
+               <height>0</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>5</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="0">
+            <widget class="QSlider" name="brushSizeSlider">
+             <property name="styleSheet">
+              <string notr="true">QSlider::groove:horizontal {
+    border: 1px solid black;
+    height: 20px;
+    margin: 2px 0;
+}
+
+QSlider::handle:horizontal {
+	background-color: black;
+    border: 1px solid black;
+    width: 2px;
+    border-radius: 3px;
+}
+
+QSlider::sub-page {
+	background: #3add36;
+	border: 1px solid black;
+}
+
+QSlider::sub-page:horizontal {
+    border: 1px solid black;
+    height: 20px;
+    margin: 2px 0;
+}</string>
+             </property>
+             <property name="minimum">
+              <number>1</number>
+             </property>
+             <property name="maximum">
+              <number>200</number>
+             </property>
+             <property name="value">
+              <number>5</number>
+             </property>
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+            </widget>
+           </item>
+           <item row="4" column="0" colspan="2">
+            <spacer name="verticalSpacer_3">
+             <property name="orientation">
+              <enum>Qt::Vertical</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>20</width>
+               <height>40</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item row="0" column="0">
+            <widget class="QLabel" name="label_3">
+             <property name="text">
+              <string>Rozmiar</string>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="0">
+            <widget class="QPushButton" name="brushColorButton">
+             <property name="styleSheet">
+              <string notr="true">QPushButton {
+	background-color: black;
+}</string>
+             </property>
+             <property name="text">
+              <string/>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
         </widget>
        </item>
        <item row="0" column="0" colspan="2">
-        <widget class="QPushButton" name="rectangleSelectButton">
-         <property name="text">
-          <string>Zaznaczenie Prostokątne</string>
+        <widget class="QGroupBox" name="groupBox">
+         <property name="title">
+          <string>GroupBox</string>
          </property>
-         <property name="checkable">
-          <bool>true</bool>
-         </property>
-         <property name="autoExclusive">
-          <bool>false</bool>
-         </property>
+         <layout class="QGridLayout" name="gridLayout_5">
+          <item row="0" column="0">
+           <widget class="QPushButton" name="rectangleSelectButton">
+            <property name="text">
+             <string>Zaznaczenie Prostokątne</string>
+            </property>
+            <property name="checkable">
+             <bool>true</bool>
+            </property>
+            <property name="autoExclusive">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QPushButton" name="selectByColorButton">
+            <property name="text">
+             <string>Magiczna Różdzka</string>
+            </property>
+            <property name="checkable">
+             <bool>true</bool>
+            </property>
+            <property name="autoRepeat">
+             <bool>false</bool>
+            </property>
+            <property name="autoExclusive">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QPushButton" name="brushButton">
+            <property name="text">
+             <string>Pędzel</string>
+            </property>
+            <property name="checkable">
+             <bool>true</bool>
+            </property>
+            <property name="autoExclusive">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+         </layout>
         </widget>
        </item>
       </layout>

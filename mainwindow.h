@@ -13,6 +13,7 @@
 #include <QGraphicsScene>
 #include <QStack>
 #include <QTimer>
+#include <QColorDialog>
 
 namespace Ui {
 class MainWindow;
@@ -22,12 +23,12 @@ class MainWindow : public QMainWindow {
     Q_OBJECT
 
 public:
-    explicit MainWindow(QWidget *parent = 0);
+    explicit MainWindow(QWidget* parent = 0);
     ~MainWindow();
 
 private slots:
-    void zoomChanged(double);
-    void sliderChanged(int);
+    void zoomChanged(double key);
+    void zoomSliderChanged(int value);
 
     void openFileAction();
     void saveFileAction();
@@ -44,39 +45,43 @@ private slots:
     void colorFilter(int colorFilter);
 
     void thresholdSliderValueChanged(int value);
+    void brushSizeSliderValueChanged(int value);
     void featherSliderValueChanged(int value);
     void featherCheckBoxChanged(bool visible);
-    void selectByColorButtonClicked(bool clicked);
-    void rectangleSelectButtonClicked(bool clicked);
+    void rectangleSelectButtonClicked(bool);
+    void selectByColorButtonClicked(bool);
+    void brushButtonClicked(bool);
+    void brushColorButtonClicked(bool);
     void rectangleSelection(QRect rectangleSelectionArea);
 
     void invertSelectedAreaColors();
 
 private:
-    Ui::MainWindow *ui;
+    Ui::MainWindow* ui;
 
     bool isSelectMask;
 
-    QGraphicsScene *scene = nullptr;
-    QGraphicsPixmapItem *imageItem = nullptr;
-    QGraphicsPixmapItem *selectedAreaItem = nullptr;
-    CustomMaskDialog *dialog = nullptr;
-    FiltersMenu *filtersMenu = nullptr;
-    FilterTool *filterTool = nullptr;
-    Histogram *histogram = nullptr;
-    ColorMenu *colorMenu = nullptr;
-    SelectionTool *selectTool = nullptr;
+    QGraphicsScene* scene = nullptr;
+    QGraphicsPixmapItem* imageItem = nullptr;
+    QGraphicsPixmapItem* selectedAreaItem = nullptr;
+    CustomMaskDialog* dialog = nullptr;
+    FiltersMenu* filtersMenu = nullptr;
+    FilterTool* filterTool = nullptr;
+    Histogram* histogram = nullptr;
+    ColorMenu* colorMenu = nullptr;
+    SelectionTool* selectTool = nullptr;
     QStack<QImage> undoStack;
     QStack<QImage> redoStack;
     QImage image;
     QTimer timer;
+    QColor brushColor;
 
     void createConnects();
     void initScene();
 
 protected:
-    void mousePressEvent(QMouseEvent *event) override;
-    void keyPressEvent(QKeyEvent *event) override;
+    void mousePressEvent(QMouseEvent* event) override;
+    void keyPressEvent(QKeyEvent* event) override;
 };
 
 #endif // MAINWINDOW_H

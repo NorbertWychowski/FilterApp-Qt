@@ -11,6 +11,7 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = FilterApp
 TEMPLATE = app
 
+CONFIG += C++11
 CONFIG += static
 CONFIG -= embed_manifest_exe
 
