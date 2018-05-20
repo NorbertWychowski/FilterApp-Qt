@@ -429,14 +429,24 @@ QSlider::sub-page:horizontal {
        </item>
        <item row="0" column="0" colspan="2">
         <widget class="QGroupBox" name="groupBox">
+         <property name="styleSheet">
+          <string notr="true"/>
+         </property>
          <property name="title">
-          <string>GroupBox</string>
+          <string/>
+         </property>
+         <property name="flat">
+          <bool>false</bool>
          </property>
          <layout class="QGridLayout" name="gridLayout_5">
           <item row="0" column="0">
            <widget class="QPushButton" name="rectangleSelectButton">
             <property name="text">
-             <string>Zaznaczenie Prostokątne</string>
+             <string/>
+            </property>
+            <property name="icon">
+             <iconset>
+              <normaloff>icons/rectangle_select_icon.png</normaloff>icons/rectangle_select_icon.png</iconset>
             </property>
             <property name="checkable">
              <bool>true</bool>
@@ -446,10 +456,14 @@ QSlider::sub-page:horizontal {
             </property>
            </widget>
           </item>
-          <item row="1" column="0">
+          <item row="0" column="1">
            <widget class="QPushButton" name="selectByColorButton">
             <property name="text">
-             <string>Magiczna Różdzka</string>
+             <string/>
+            </property>
+            <property name="icon">
+             <iconset>
+              <normaloff>icons/magic_wand_icon.png</normaloff>icons/magic_wand_icon.png</iconset>
             </property>
             <property name="checkable">
              <bool>true</bool>
@@ -462,10 +476,14 @@ QSlider::sub-page:horizontal {
             </property>
            </widget>
           </item>
-          <item row="2" column="0">
+          <item row="0" column="2">
            <widget class="QPushButton" name="brushButton">
             <property name="text">
-             <string>Pędzel</string>
+             <string/>
+            </property>
+            <property name="icon">
+             <iconset>
+              <normaloff>icons/brush_icon.png</normaloff>icons/brush_icon.png</iconset>
             </property>
             <property name="checkable">
              <bool>true</bool>
@@ -554,7 +572,6 @@ QSlider::sub-page:horizontal {
    <addaction name="menuKolory"/>
    <addaction name="menuNarz_dzia"/>
   </widget>
-  <widget class="QStatusBar" name="statusBar"/>
   <action name="actionOpen">
    <property name="text">
     <string>Otwórz</string>

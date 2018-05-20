@@ -21,6 +21,7 @@ public:
 
 private slots:
     void draw();
+    void defaultSettings();
 
 private:
     Ui::ColorMenu* ui;
@@ -30,6 +31,7 @@ private:
     QTimer* timer;
 
     void waitWithDraw();
+    void initUI();
     void createConnects();
 };
 

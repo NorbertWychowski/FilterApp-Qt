@@ -5,14 +5,14 @@
 #include <QFutureSynchronizer>
 #include <QLegendMarker>
 
-Histogram::Histogram(QImage &image, QWidget *parent) : QDialog(parent), ui(new Ui::Histogram) {
+Histogram::Histogram(QImage& image, QWidget* parent) : QDialog(parent), ui(new Ui::Histogram) {
     ui->setupUi(this);
     setAttribute(Qt::WA_DeleteOnClose);
+    setWindowFlags(windowFlags() & (~Qt::WindowContextHelpButtonHint));
 
     if(!image.isNull()) {
         createChart(image);
         createConnects();
-        qDebug() << "test";
     }
 
     raise();
@@ -21,7 +21,7 @@ Histogram::Histogram(QImage &image, QWidget *parent) : QDialog(parent), ui(new U
     activateWindow();
 
     double width = chart->size().width() / 256.0;
-    for(QBarSeries *s : series)
+    for(QBarSeries* s : series)
         s->setBarWidth(width < 1.0 ? 1.0 : width);
 }
 
@@ -31,7 +31,7 @@ Histogram::~Histogram() {
 }
 
 void Histogram::changeHistogram() {
-    QLegendMarker *marker = qobject_cast<QLegendMarker *> (sender());
+    QLegendMarker* marker = qobject_cast<QLegendMarker*> (sender());
     Q_ASSERT(marker);
 
     Qt::GlobalColor color[] = {Qt::black, Qt::red, Qt::green, Qt::blue};
@@ -69,13 +69,13 @@ void Histogram::changeHistogram() {
     axisY->setRange(0, max);
 }
 
-void Histogram::resizeEvent(QResizeEvent *e) {
+void Histogram::resizeEvent(QResizeEvent* e) {
     double width = chart->size().width() / 256.0;
     for(int i = 0; i < 4; i++)
         series[i]->setBarWidth(width < 1.0 ? 1.0 : width);
 }
 
-void Histogram::createChart(QImage &image) {
+void Histogram::createChart(QImage& image) {
     int maxThreads = QThread::idealThreadCount();
     QFutureSynchronizer<void> futures;
 
@@ -88,7 +88,7 @@ void Histogram::createChart(QImage &image) {
 
     auto loadData = [&](int start, int end) {
         for(int y = start; y < end; y++) {
-            QRgb *line = (QRgb*)image.scanLine(y);
+            QRgb* line = (QRgb*)image.scanLine(y);
 
             for(int x = 0; x < image.width(); x++) {
                 QColor color = QColor(line[x]);
@@ -101,7 +101,7 @@ void Histogram::createChart(QImage &image) {
     };
 
     int h = image.height() / maxThreads;
-    for (int i = 0; i<maxThreads; ++i)
+    for (int i = 0; i < maxThreads; ++i)
         futures.addFuture(QtConcurrent::run(loadData, i * h, (i + 1) * h));
 
     futures.waitForFinished();
@@ -152,7 +152,7 @@ void Histogram::createChart(QImage &image) {
 }
 
 void Histogram::createConnects() {
-    for(QLegendMarker *marker : chart->legend()->markers()) {
+    for(QLegendMarker* marker : chart->legend()->markers()) {
         disconnect(marker, SIGNAL(clicked()), this, SLOT(changeHistogram()));
         connect(marker, SIGNAL(clicked()), this, SLOT(changeHistogram()));
     }

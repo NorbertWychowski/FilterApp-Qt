@@ -10,9 +10,10 @@
 #include <QTimer>
 #include <QWidget>
 
-FiltersMenu::FiltersMenu(QImage &image, int filter, QWidget *parent) : QDialog(parent), ui(new Ui::FiltersMenu) {
+FiltersMenu::FiltersMenu(QImage& image, int filter, QWidget* parent) : QDialog(parent), ui(new Ui::FiltersMenu) {
     ui->setupUi(this);
     setAttribute(Qt::WA_DeleteOnClose);
+    setWindowFlags(windowFlags() & (~Qt::WindowContextHelpButtonHint));
 
     this->filter = filter;
     this->image = image;
@@ -68,7 +69,7 @@ void FiltersMenu::blurPreview() {
     timer->stop();
 }
 
-void FiltersMenu::resizeEvent(QResizeEvent *) {
+void FiltersMenu::resizeEvent(QResizeEvent*) {
     width = ui->graphicsView->width();
     height = ui->graphicsView->height();
 
@@ -85,7 +86,7 @@ void FiltersMenu::resizeEvent(QResizeEvent *) {
 void FiltersMenu::createConnects() {
     //przesuwanie podgladu myszka
     connect(ui->graphicsView,   SIGNAL(updatePos(QPoint)),   this, SLOT(updateScene(QPoint)));
-    connect(ui->graphicsView,   SIGNAL(mouseRelease(QPoint)),this, SLOT(mouseReleased(QPoint)));
+    connect(ui->graphicsView,   SIGNAL(mouseRelease(QPoint)), this, SLOT(mouseReleased(QPoint)));
     //po kliknieciu "ok" - wyslanie wybranego promienia rozmycia
     connect(this,               SIGNAL(accepted()),          this, SLOT(blurRadiusSelected()));
     //rozmycie podgladu po 0.4s od ostatniej zmiany spinboxa - optymalizacja
