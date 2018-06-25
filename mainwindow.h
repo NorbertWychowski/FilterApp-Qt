@@ -55,6 +55,7 @@ private slots:
     void rectangleSelection(QRect rectangleSelectionArea);
 
     void invertSelectedAreaColors();
+    void updateUndoRedoStack();
 
 private:
     Ui::MainWindow* ui;

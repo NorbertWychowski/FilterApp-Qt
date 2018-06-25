@@ -27,6 +27,11 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
     ui->toolsOptions->setVisible(false);
     ui->toolsOptions->setEnabled(false);
     ui->toolsOptions->tabBar()->hide();
+    ui->actionSaveAs->setEnabled(false);
+    ui->groupBox->setEnabled(false);
+    ui->menuFiltry->setEnabled(false);
+    ui->menuKolory->setEnabled(false);
+    ui->menuNarz_dzia->setEnabled(false);
 
     createConnects();
     initScene();
@@ -82,6 +87,12 @@ void MainWindow::openFileAction() {
         image.load(file);
         if (image.format() != QImage::Format_RGB32)
             image = image.convertToFormat(QImage::Format_RGB32);
+
+        ui->actionSaveAs->setEnabled(true);
+        ui->groupBox->setEnabled(true);
+        ui->menuFiltry->setEnabled(true);
+        ui->menuKolory->setEnabled(true);
+        ui->menuNarz_dzia->setEnabled(true);
 
         undoStack.clear();
         redoStack.clear();
@@ -334,6 +345,10 @@ void MainWindow::thresholdSliderValueChanged(int value) {
 
 void MainWindow::brushSizeSliderValueChanged(int value) {
     ui->brushSizeLabel->setNum(value);
+    if(brushColor.spec() != QColor::Invalid) {
+        ui->graphicsView->setBrush(brushColor, value);
+        ui->brushColorButton->setStyleSheet("background-color: " + brushColor.name());
+    }
 }
 
 void MainWindow::featherSliderValueChanged(int value) {
@@ -373,6 +388,8 @@ void MainWindow::brushButtonClicked(bool) {
 
     selectedAreaItem->setPixmap(QPixmap());
     ui->graphicsView->disableRectSelect();
+    ui->graphicsView->enableBrush();
+    ui->graphicsView->setBrush(brushColor, ui->brushSizeSlider->value());
 
     isSelectMask = false;
     timer.stop();
@@ -381,8 +398,12 @@ void MainWindow::brushButtonClicked(bool) {
 }
 
 void MainWindow::brushColorButtonClicked(bool) {
-    brushColor = QColorDialog::getColor(Qt::green, this, "Wybierz kolor");
-    ui->brushColorButton->setStyleSheet("background-color: " + brushColor.name());
+    QColor tmp  = QColorDialog::getColor(Qt::green, this, "Wybierz kolor");
+    if(tmp.spec() != QColor::Invalid) {
+        brushColor = tmp;
+        ui->graphicsView->setBrush(brushColor, ui->brushSizeSlider->value());
+        ui->brushColorButton->setStyleSheet("background-color: " + brushColor.name());
+    }
 }
 
 void MainWindow::rectangleSelection(QRect rectangleSelectionArea) {
@@ -408,6 +429,18 @@ void MainWindow::invertSelectedAreaColors() {
     QImage tmp = selectedAreaItem->pixmap().toImage();
     tmp.invertPixels();
     selectedAreaItem->setPixmap(QPixmap::fromImage(tmp));
+}
+
+void MainWindow::updateUndoRedoStack() {
+    QStack<QImage> tmp = ui->graphicsView->getPreviousVersions();
+    ui->graphicsView->deletePreviousVersions();
+
+    image = ui->graphicsView->getImage();
+
+    for(QImage i : tmp)
+        undoStack.push(i);
+
+    redoStack.clear();
 }
 
 void MainWindow::createConnects() {
@@ -450,9 +483,8 @@ void MainWindow::createConnects() {
     connect(ui->brushColorButton,      SIGNAL(clicked(bool)),       SLOT(brushColorButtonClicked(bool)));
     connect(ui->rectangleSelectButton, SIGNAL(clicked(bool)),       SLOT(rectangleSelectButtonClicked(bool)));
     connect(ui->graphicsView,          SIGNAL(selectedArea(QRect)), SLOT(rectangleSelection(QRect)));
-
-    //zmiana koloru zaznaczenia co 0.5s
-    connect(&timer, SIGNAL(timeout()), SLOT(invertSelectedAreaColors()));
+    connect(&timer,                    SIGNAL(timeout()),           SLOT(invertSelectedAreaColors()));
+    connect(ui->graphicsView,          SIGNAL(updateUndoRedoStack()), SLOT(updateUndoRedoStack()));
 }
 
 void MainWindow::initScene() {
