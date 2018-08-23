@@ -23,8 +23,8 @@ class MainWindow : public QMainWindow {
     Q_OBJECT
 
 public:
-    explicit MainWindow(QWidget* parent = 0);
-    ~MainWindow();
+    explicit MainWindow(QWidget *parent = nullptr);
+    ~MainWindow() override;
 
 private slots:
     void zoomChanged(double key);
@@ -58,19 +58,19 @@ private slots:
     void updateUndoRedoStack();
 
 private:
-    Ui::MainWindow* ui;
+    Ui::MainWindow *ui;
 
     bool isSelectMask;
 
-    QGraphicsScene* scene = nullptr;
-    QGraphicsPixmapItem* imageItem = nullptr;
-    QGraphicsPixmapItem* selectedAreaItem = nullptr;
-    CustomMaskDialog* dialog = nullptr;
-    FiltersMenu* filtersMenu = nullptr;
-    FilterTool* filterTool = nullptr;
-    Histogram* histogram = nullptr;
-    ColorMenu* colorMenu = nullptr;
-    SelectionTool* selectTool = nullptr;
+    QGraphicsScene *scene = nullptr;
+    QGraphicsPixmapItem *imageItem = nullptr;
+    QGraphicsPixmapItem *selectedAreaItem = nullptr;
+    CustomMaskDialog *dialog = nullptr;
+    FiltersMenu *filtersMenu = nullptr;
+    FilterTool *filterTool = nullptr;
+    Histogram *histogram = nullptr;
+    ColorMenu *colorMenu = nullptr;
+    SelectionTool *selectTool = nullptr;
     QStack<QImage> undoStack;
     QStack<QImage> redoStack;
     QImage image;
@@ -81,8 +81,8 @@ private:
     void initScene();
 
 protected:
-    void mousePressEvent(QMouseEvent* event) override;
-    void keyPressEvent(QKeyEvent* event) override;
+    void mousePressEvent(QMouseEvent *event) override;
+    void keyPressEvent(QKeyEvent *event) override;
 };
 
 #endif // MAINWINDOW_H

@@ -14,7 +14,7 @@ signals:
     void updateUndoRedoStack();
 
 public:
-    myGraphicsView(QWidget* parent = 0);
+    myGraphicsView(QWidget *parent = nullptr);
 
     void enableRectSelect();
     void disableRectSelect();
@@ -31,18 +31,18 @@ public:
     QImage getImage();
 
 protected:
-    void wheelEvent(QWheelEvent* event) override;
-    void mousePressEvent(QMouseEvent* event) override;
-    void mouseMoveEvent(QMouseEvent* event) override;
-    void mouseReleaseEvent(QMouseEvent* event) override;
+    void wheelEvent(QWheelEvent *event) override;
+    void mousePressEvent(QMouseEvent *event) override;
+    void mouseMoveEvent(QMouseEvent *event) override;
+    void mouseReleaseEvent(QMouseEvent *event) override;
 
 private:
     bool isRectSelect;
     bool isBrushEnabled;
     QPoint offset;
-    QGraphicsRectItem* rectItem;
-    QGraphicsRectItem* rectItemBorder;
-    QGraphicsRectItem* rectItemBorder2;
+    QGraphicsRectItem *rectItem;
+    QGraphicsRectItem *rectItemBorder;
+    QGraphicsRectItem *rectItemBorder2;
     QMap<double, QString>::const_iterator zoom;
     static const QMap<double, QString> zoomValues;
     QStack<QImage> previousVersions;

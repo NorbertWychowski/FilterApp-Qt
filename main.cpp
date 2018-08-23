@@ -2,9 +2,10 @@
 #include <QApplication>
 #include <QTranslator>
 #include <QLibraryInfo>
-#include <QDesktopWidget>
+#include <QWindow>
+#include <QScreen>
 
-int main(int argc, char* argv[]) {
+int main(int argc, char *argv[]) {
     QTranslator qtTranslator;
     qtTranslator.load("qt_" + QLocale::system().name(), QLibraryInfo::location(QLibraryInfo::TranslationsPath));
 
@@ -12,7 +13,8 @@ int main(int argc, char* argv[]) {
     a.installTranslator(&qtTranslator);
     MainWindow w;
     w.show();
-    w.move(QApplication::desktop()->screen()->rect().center() - w.rect().center());
+
+    w.move(w.window()->windowHandle()->screen()->geometry().center() - w.rect().center());
 
     return a.exec();
 }

@@ -14,12 +14,15 @@ QImage FilterTool::splot(QImage &img, FILTER choose, Matrix userKernel) {
     case LAPLACE_FILTER:
         kernel = Matrix::getLaplaceKernel();
         break;
+
     case HIGHPASS_FILTER:
         kernel = Matrix::getHighPassKernel();
         break;
+
     case USER_FILTER:
         kernel = userKernel;
         break;
+
     default:
         break;
     }
@@ -39,20 +42,24 @@ QImage FilterTool::splot(QImage &img, FILTER choose, Matrix userKernel) {
         int b = 0;
         QRgb color;
 
-        if(start == 0) start += N/2;
-        if(end == img.height()) end -= N/2;
+        if (start == 0) start += N / 2;
+
+        if (end == img.height()) end -= N / 2;
+
         for (int y = start; y < end; ++y) {
-            for (int x = N/2; x < img.width() - N/2; ++x) {
-                for (int i = 0; i<M; ++i) {
-                    QRgb *imgLine = (QRgb*)(img.scanLine(y - N/2 + i));
-                    for (int j = 0; j<N; ++j) {
+            for (int x = N / 2; x < img.width() - N / 2; ++x) {
+                for (int i = 0; i < M; ++i) {
+                    QRgb *imgLine = reinterpret_cast<QRgb *>(img.scanLine(y - N / 2 + i));
+
+                    for (int j = 0; j < N; ++j) {
                         color = imgLine[x - N + j];
                         r += kernel[i][j] * qRed(color);
                         g += kernel[i][j] * qGreen(color);
                         b += kernel[i][j] * qBlue(color);
                     }
                 }
-                if (norm != 0) {
+
+                if (norm != 0.0) {
                     r = qBound(0, int(r / norm), 255);
                     g = qBound(0, int(g / norm), 255);
                     b = qBound(0, int(b / norm), 255);
@@ -61,7 +68,8 @@ QImage FilterTool::splot(QImage &img, FILTER choose, Matrix userKernel) {
                     g = qBound(0, g, 255);
                     b = qBound(0, b, 255);
                 }
-                res.setPixel(x - N/2, y - N/2, qRgb(r, g, b));
+
+                res.setPixel(x - N / 2, y - N / 2, qRgb(r, g, b));
                 r = g = b = 0;
             }
         }
@@ -70,15 +78,15 @@ QImage FilterTool::splot(QImage &img, FILTER choose, Matrix userKernel) {
     int maxThreads = QThread::idealThreadCount();
     QFutureSynchronizer<void> futures;
 
-    for(int i=0; i<maxThreads; ++i)
-        futures.addFuture(QtConcurrent::run(f, i*img.height()/maxThreads, (i+1)*img.height()/maxThreads));
+    for (int i = 0; i < maxThreads; ++i)
+        futures.addFuture(QtConcurrent::run(f, i * img.height() / maxThreads, (i + 1)*img.height() / maxThreads));
 
     futures.waitForFinished();
 
     return res;
 }
 
-QImage FilterTool::splot(QImage &img, FILTER choose, qint8 ** selectedTab, Matrix userKernel) {
+QImage FilterTool::splot(QImage &img, FILTER choose, qint8 **selectedTab, Matrix userKernel) {
     Matrix kernel;
     QImage res;
 
@@ -86,12 +94,15 @@ QImage FilterTool::splot(QImage &img, FILTER choose, qint8 ** selectedTab, Matri
     case LAPLACE_FILTER:
         kernel = Matrix::getLaplaceKernel();
         break;
+
     case HIGHPASS_FILTER:
         kernel = Matrix::getHighPassKernel();
         break;
+
     case USER_FILTER:
         kernel = userKernel;
         break;
+
     default:
         break;
     }
@@ -113,21 +124,25 @@ QImage FilterTool::splot(QImage &img, FILTER choose, qint8 ** selectedTab, Matri
         int b = 0;
         QRgb color;
 
-        if(start == 0) start += N/2;
-        if(end == img.height()) end -= N/2;
+        if (start == 0) start += N / 2;
+
+        if (end == img.height()) end -= N / 2;
+
         for (int y = start; y < end; ++y) {
-            for (int x = N/2; x < img.width() - N/2; ++x) {
-                if(selectedTab[y][x] == 1) {
-                    for (int i = 0; i<M; ++i) {
-                        QRgb *imgLine = (QRgb*)img.scanLine(y - N/2 + i);
-                        for (int j = 0; j<N; ++j) {
-                            color = imgLine[x - N/2 + j];
+            for (int x = N / 2; x < img.width() - N / 2; ++x) {
+                if (selectedTab[y][x] == 1) {
+                    for (int i = 0; i < M; ++i) {
+                        QRgb *imgLine = reinterpret_cast<QRgb *>(img.scanLine(y - N / 2 + i));
+
+                        for (int j = 0; j < N; ++j) {
+                            color = imgLine[x - N / 2 + j];
                             r += kernel[i][j] * qRed(color);
                             g += kernel[i][j] * qGreen(color);
                             b += kernel[i][j] * qBlue(color);
                         }
                     }
-                    if (norm != 0) {
+
+                    if (norm != 0.0) {
                         r = qBound(0, int(r / norm), 255);
                         g = qBound(0, int(g / norm), 255);
                         b = qBound(0, int(b / norm), 255);
@@ -136,17 +151,18 @@ QImage FilterTool::splot(QImage &img, FILTER choose, qint8 ** selectedTab, Matri
                         g = qBound(0, g, 255);
                         b = qBound(0, b, 255);
                     }
-                    res.setPixel(x - M/2, y - N/2, qRgb(r, g, b));
+
+                    res.setPixel(x - M / 2, y - N / 2, qRgb(r, g, b));
                     r = g = b = 0;
                 } else {
-                    res.setPixel(x - M/2, y - N/2, img.pixel(x, y));
+                    res.setPixel(x - M / 2, y - N / 2, img.pixel(x, y));
                 }
             }
         }
     };
 
-    for(int i=0; i<maxThreads; ++i)
-        futures.addFuture(QtConcurrent::run(f, i*img.height()/maxThreads, (i+1)*img.height()/maxThreads));
+    for (int i = 0; i < maxThreads; ++i)
+        futures.addFuture(QtConcurrent::run(f, i * img.height() / maxThreads, (i + 1)*img.height() / maxThreads));
 
     futures.waitForFinished();
 

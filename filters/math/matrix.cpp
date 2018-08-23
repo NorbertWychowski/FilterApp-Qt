@@ -21,27 +21,31 @@ Matrix::Matrix() : N(0), M(0) {
 }
 
 Matrix::Matrix(int N) : N(N), M(N) {
-    matrix = new double*[N];
-    for(int i=0; i<N; i++)
-        matrix[i] = new double[N];
+    matrix = new double*[static_cast<unsigned int>(N)];
+
+    for (int i = 0; i < N; i++)
+        matrix[i] = new double[static_cast<unsigned int>(N)];
 }
 
 Matrix::Matrix(int N, int M) : N(N), M(M) {
-    matrix = new double*[N];
-    for(int i=0; i<N; i++)
-        matrix[i] = new double[M];
+    matrix = new double*[static_cast<unsigned int>(N)];
+
+    for (int i = 0; i < N; i++)
+        matrix[i] = new double[static_cast<unsigned int>(M)];
 }
 
 Matrix::Matrix(std::initializer_list<std::initializer_list<double> > values) :
     N(int(values.size())), M(int(values.begin()->size())) {
 
-    matrix = new double*[N];
+    matrix = new double*[static_cast<unsigned int>(N)];
 
     int i = 0;
     int j = 0;
-    for(std::initializer_list<double> x : values) {
-        matrix[i] = new double[M];
-        for(double val : x)
+
+    for (std::initializer_list<double> x : values) {
+        matrix[i] = new double[static_cast<unsigned int>(M)];
+
+        for (double val : x)
             matrix[i][j++] = val;
 
         i++;
@@ -49,15 +53,16 @@ Matrix::Matrix(std::initializer_list<std::initializer_list<double> > values) :
     }
 }
 
-Matrix::Matrix(const Matrix& matrix) {
+Matrix::Matrix(const Matrix &matrix) {
     this->N = matrix.N;
     this->M = matrix.M;
     this->matrix = matrix.matrix;
 }
 
 void Matrix::deleteMatrix() {
-    for(int i=0; i<N; i++)
+    for (int i = 0; i < N; i++)
         delete[] matrix[i];
+
     delete[] matrix;
 }
 
@@ -73,9 +78,11 @@ double Matrix::getNorm(Matrix m) {
     int N = m.getNDimension();
     int M = m.getMDimension();
     double norm = 0;
-    for(int i=0; i<N; ++i)
-        for(int j=0; j<M; ++j)
+
+    for (int i = 0; i < N; ++i)
+        for (int j = 0; j < M; ++j)
             norm += m[i][j];
+
     return norm;
 }
 

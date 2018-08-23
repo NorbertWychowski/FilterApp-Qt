@@ -20,12 +20,14 @@ const QMap<double, QString> myGraphicsView::zoomValues = QMap<double, QString>( 
     std::make_pair(8.0, "800%"),
 });
 
-myGraphicsView::myGraphicsView(QWidget* parent) : QGraphicsView(parent) {
-    isRectSelect = false;
+myGraphicsView::myGraphicsView(QWidget *parent) : QGraphicsView(parent) {
+    disableRectSelect();
+    disableBrush();
     zoom = zoomValues.find(1.0);
 }
 
 void myGraphicsView::enableRectSelect() {
+    disableBrush();
     this->isRectSelect = true;
 }
 
@@ -34,6 +36,7 @@ void myGraphicsView::disableRectSelect() {
 }
 
 void myGraphicsView::enableBrush() {
+    disableRectSelect();
     this->isBrushEnabled = true;
 }
 
@@ -64,17 +67,17 @@ QMap<double, QString> myGraphicsView::getZoomValues() {
 }
 
 QImage myGraphicsView::getImage() {
-    return ((QGraphicsPixmapItem*)scene()->items()[1])->pixmap().toImage();
+    return dynamic_cast<QGraphicsPixmapItem *>(scene()->items()[1])->pixmap().toImage();
 }
 
-void myGraphicsView::wheelEvent(QWheelEvent* event) {
+void myGraphicsView::wheelEvent(QWheelEvent *event) {
     if (QGuiApplication::keyboardModifiers() & Qt::ControlModifier) {
 
         if (event->delta() > 0) {
-            if(zoom + 1 != zoomValues.end())
+            if (zoom + 1 != zoomValues.end())
                 zoom++;
         } else if (event->delta() < 0) {
-            if(zoom != zoomValues.begin())
+            if (zoom != zoomValues.begin())
                 zoom--;
         }
 
@@ -87,19 +90,18 @@ void myGraphicsView::wheelEvent(QWheelEvent* event) {
     }
 }
 
-void myGraphicsView::mousePressEvent(QMouseEvent* event) {
+void myGraphicsView::mousePressEvent(QMouseEvent *event) {
     QPoint local = mapFromGlobal(event->globalPos());
     QPointF l = mapToScene(local);
 
     offset = l.toPoint();
 
-    if(event->buttons() & Qt::LeftButton) {
-        if(isRectSelect) {
-            rectItemBorder = scene()->addRect(QRect(l.x(), l.y(), 0, 0), QPen(Qt::white, 1));
-            rectItem = scene()->addRect(QRect(l.x(), l.y(), 0, 0), QPen(Qt::black, 1));
-            //rectItemBorder2 = scene()->addRect(QRect(l.x(), l.y(), 0, 0), QPen(Qt::white, 1));
-        } else if(isBrushEnabled) {
-            QGraphicsPixmapItem* imageItem = (QGraphicsPixmapItem*)scene()->items()[1];
+    if (event->buttons() & Qt::LeftButton) {
+        if (isRectSelect) {
+            rectItemBorder = scene()->addRect(QRect(static_cast<int>(l.x()), static_cast<int>(l.y()), 0, 0), QPen(Qt::white, 1));
+            rectItem = scene()->addRect(QRect(static_cast<int>(l.x()), static_cast<int>(l.y()), 0, 0), QPen(Qt::black, 1));
+        } else if (isBrushEnabled) {
+            QGraphicsPixmapItem *imageItem = dynamic_cast<QGraphicsPixmapItem *>(scene()->items()[1]);
             QPixmap pixmap = imageItem->pixmap();
             previousVersions.push(pixmap.toImage());
             QPainter painter(&pixmap);
@@ -114,17 +116,19 @@ void myGraphicsView::mousePressEvent(QMouseEvent* event) {
 
     event->ignore();
 }
-
-void myGraphicsView::mouseMoveEvent(QMouseEvent* event) {
+#include <QDebug>
+void myGraphicsView::mouseMoveEvent(QMouseEvent *event) {
     QPoint local = mapFromGlobal(event->globalPos());
     QPointF l = mapToScene(local);
-    if(event->buttons() & Qt::LeftButton) {
-        if(isRectSelect) {
-            rectItem->setRect(QRect(QPoint(offset.x(), offset.y()), QPoint(l.x(), l.y())).normalized());
-            rectItemBorder->setRect(QRect(QPoint(offset.x() - 1, offset.y() - 1), QPoint(l.x() + 1, l.y() + 1)).normalized());
-//            rectItemBorder2->setRect(QRect(QPoint(offset.x() + 1, offset.y() + 1), QPoint(l.x() - 1, l.y() - 1)).normalized());
-        } else if(isBrushEnabled) {
-            QGraphicsPixmapItem* imageItem = (QGraphicsPixmapItem*)scene()->items()[1];
+
+    qDebug() << isBrushEnabled;
+
+    if (event->buttons() & Qt::LeftButton) {
+        if (isRectSelect) {
+            rectItem->setRect(QRect(QPoint(offset.x(), offset.y()), QPoint(static_cast<int>(l.x()), static_cast<int>(l.y()))).normalized());
+            rectItemBorder->setRect(QRect(QPoint(offset.x() - 1, offset.y() - 1), QPoint(static_cast<int>(l.x() + 1), static_cast<int>(l.y() + 1))).normalized());
+        } else if (isBrushEnabled) {
+            QGraphicsPixmapItem *imageItem = dynamic_cast<QGraphicsPixmapItem *>(scene()->items()[1]);
             QPixmap pixmap = imageItem->pixmap();
             QPainter painter(&pixmap);
             painter.setRenderHint(QPainter::Antialiasing, true);
@@ -136,16 +140,15 @@ void myGraphicsView::mouseMoveEvent(QMouseEvent* event) {
         }
     }
 }
-void myGraphicsView::mouseReleaseEvent(QMouseEvent* event) {
-    if(event->button() & Qt::LeftButton) {
-        if(isRectSelect) {
-            if(!rectItem->rect().isNull())
+void myGraphicsView::mouseReleaseEvent(QMouseEvent *event) {
+    if (event->button() & Qt::LeftButton) {
+        if (isRectSelect) {
+            if (!rectItem->rect().isNull())
                 emit selectedArea(rectItem->rect().toRect());
 
-            scene()->removeItem((QGraphicsItem*)rectItem);
-            scene()->removeItem((QGraphicsItem*)rectItemBorder);
-//            scene()->removeItem((QGraphicsItem*)rectItemBorder2);
-        } else if(isBrushEnabled) {
+            scene()->removeItem(dynamic_cast<QGraphicsItem *>(rectItem));
+            scene()->removeItem(dynamic_cast<QGraphicsItem *>(rectItemBorder));
+        } else if (isBrushEnabled) {
             emit updateUndoRedoStack();
         }
     }

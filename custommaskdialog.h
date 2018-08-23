@@ -3,7 +3,6 @@
 
 #include <QDialog>
 #include <QSpinBox>
-
 #include "filters/math/matrix.h"
 
 namespace Ui {
@@ -17,7 +16,7 @@ signals:
     void customMask(Matrix);
 
 public:
-    explicit CustomMaskDialog(QWidget *parent = 0);
+    explicit CustomMaskDialog(QWidget *parent = nullptr);
     ~CustomMaskDialog();
 
 private slots:
@@ -26,7 +25,7 @@ private slots:
 private:
     Ui::CustomMaskDialog *ui;
 
-    QList<QSpinBox*> spinBoxes;
+    QList<QSpinBox *> spinBoxes;
 
     void createSpinBoxes();
 };

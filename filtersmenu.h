@@ -19,7 +19,7 @@ signals:
     void blurRadius(int radius);
 
 public:
-    explicit FiltersMenu(QImage &image, int filter, QWidget *parent = 0);
+    explicit FiltersMenu(QImage &image, int filter, QWidget *parent = nullptr);
     ~FiltersMenu();
 
     void resizeEvent(QResizeEvent *);

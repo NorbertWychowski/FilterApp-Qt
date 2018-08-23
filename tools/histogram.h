@@ -19,7 +19,7 @@ class Histogram : public QDialog {
     Q_OBJECT
 
 public:
-    explicit Histogram(QImage &image, QWidget *parent = 0);
+    explicit Histogram(QImage &image, QWidget *parent = nullptr);
     ~Histogram();
 
 private slots:

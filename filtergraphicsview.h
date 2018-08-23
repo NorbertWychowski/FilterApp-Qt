@@ -11,7 +11,7 @@ signals:
     void mouseRelease(QPoint pos);
 
 public:
-    FilterGraphicsView(QWidget *parent=0);
+    FilterGraphicsView(QWidget *parent = nullptr);
 
 protected:
     void mousePressEvent(QMouseEvent *event) override;

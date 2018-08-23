@@ -20,15 +20,15 @@ public:
 
 private:
     void gaussBlur_4(int **source, int **dest, double sigma);
-    int* boxesForGauss(double sigma, int n);
+    int *boxesForGauss(double sigma, int n);
     void boxBlur_4(int **source, int **dest, int w, int h, int r);
 
-    int* _red;
-    int* _green;
-    int* _blue;
-    int* newRed;
-    int* newGreen;
-    int* newBlue;
+    int *_red;
+    int *_green;
+    int *_blue;
+    int *newRed;
+    int *newGreen;
+    int *newBlue;
 
     int _width;
     int _height;

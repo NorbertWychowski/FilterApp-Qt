@@ -9,7 +9,7 @@ public:
     Matrix(int N);
     Matrix(int N, int M);
     Matrix(std::initializer_list<std::initializer_list <double>> values);
-    Matrix(const Matrix& matrix);
+    Matrix(const Matrix &matrix);
     void deleteMatrix();
 
     int getNDimension();

@@ -4,7 +4,7 @@
 #include "filters/colortool.h"
 #include <QTimer>
 
-ColorMenu::ColorMenu(int filterColor, QWidget* parent) : QDialog(parent), ui(new Ui::ColorMenu) {
+ColorMenu::ColorMenu(int filterColor, QWidget *parent) : QDialog(parent), ui(new Ui::ColorMenu) {
     ui->setupUi(this);
     setAttribute(Qt::WA_DeleteOnClose);
     setWindowFlags(windowFlags() & (~Qt::WindowContextHelpButtonHint));
@@ -32,11 +32,11 @@ void ColorMenu::draw() {
     int tmp;
     double F;
 
-    switch(filterColor) {
+    switch (filterColor) {
     case COLORIZE:
         H = ui->cHueSlider->value();
-        S = ui->cSaturationSlider->value() * 2.55;
-        V = ui->cValueSlider->value() * 2.55;
+        S = static_cast<int>(ui->cSaturationSlider->value() * 2.55);
+        V = static_cast<int>(ui->cValueSlider->value() * 2.55);
 
         emit colors(H, S, V);
 
@@ -44,28 +44,36 @@ void ColorMenu::draw() {
         green = QColor::fromHsv(H, S, qBound(0, green.value() + V, 255));
         blue = QColor::fromHsv(H, S, qBound(0, blue.value() + V, 255));
         break;
+
     case HUESATURATION:
         H = ui->sHueSlider->value();
-        S = ui->sSaturationSlider->value() * 2.55;
-        V = ui->sValueSlider->value() * 2.55;
+        S = static_cast<int>(ui->sSaturationSlider->value() * 2.55);
+        V = static_cast<int>(ui->sValueSlider->value() * 2.55);
 
         emit colors(H, S, V);
 
         tmp = red.hue() + H;
+
         if (tmp < 0) tmp += 360;
         else if (tmp > 359) tmp -= 360;
+
         red = QColor::fromHsv(tmp, qBound(0, red.saturation() + S, 255), qBound(0, red.value() + V, 255));
 
         tmp = green.hue() + H;
+
         if (tmp < 0) tmp += 360;
         else if (tmp > 359) tmp -= 360;
+
         green = QColor::fromHsv(tmp, qBound(0, green.saturation() + S, 255), qBound(0, green.value() + V, 255));
 
         tmp = blue.hue() + H;
+
         if (tmp < 0) tmp += 360;
         else if (tmp > 359) tmp -= 360;
+
         blue = QColor::fromHsv(tmp, qBound(0, blue.saturation() + S, 255), qBound(0, blue.value() + V, 255));
         break;
+
     case BRIGHTNESSCONTRAST:
         B = ui->brightnessSlider->value();
         C = ui->contrastSlider->value();
@@ -73,17 +81,17 @@ void ColorMenu::draw() {
         emit brightnessContrast(B, C);
 
         F = (259.0 * (C + 255)) / (255.0 * (259 - C));
-        red = QColor(qBound(0.0, (F * (red.red() - 128) + 128) + B, 255.0),
-                     qBound(0.0, (F * (red.green() - 128) + 128) + B, 255.0),
-                     qBound(0.0, (F * (red.blue() - 128) + 128) + B, 255.0));
+        red = QColor(qBound(0, static_cast<int>(F * (red.red() - 128) + 128) + B, 255),
+                     qBound(0, static_cast<int>(F * (red.green() - 128) + 128) + B, 255),
+                     qBound(0, static_cast<int>(F * (red.blue() - 128) + 128) + B, 255));
 
-        green = QColor(qBound(0.0, (F * (green.red() - 128) + 128) + B, 255.0),
-                       qBound(0.0, (F * (green.green() - 128) + 128) + B, 255.0),
-                       qBound(0.0, (F * (green.blue() - 128) + 128) + B, 255.0));
+        green = QColor(qBound(0, static_cast<int>(F * (green.red() - 128) + 128) + B, 255),
+                       qBound(0, static_cast<int>(F * (green.green() - 128) + 128) + B, 255),
+                       qBound(0, static_cast<int>(F * (green.blue() - 128) + 128) + B, 255));
 
-        blue = QColor(qBound(0.0, (F * (blue.red() - 128) + 128) + B, 255.0),
-                      qBound(0.0, (F * (blue.green() - 128) + 128) + B, 255.0),
-                      qBound(0.0, (F * (blue.blue() - 128) + 128) + B, 255.0));
+        blue = QColor(qBound(0, static_cast<int>(F * (blue.red() - 128) + 128) + B, 255),
+                      qBound(0, static_cast<int>(F * (blue.green() - 128) + 128) + B, 255),
+                      qBound(0, static_cast<int>(F * (blue.blue() - 128) + 128) + B, 255));
         break;
     }
 
@@ -95,7 +103,7 @@ void ColorMenu::draw() {
 }
 
 void ColorMenu::defaultSettings() {
-    switch(filterColor) {
+    switch (filterColor) {
     case COLORIZE:
         ui->cHueSlider->setValue(180);
         ui->cHueSpinBox->setValue(180);
@@ -104,6 +112,7 @@ void ColorMenu::defaultSettings() {
         ui->cValueSlider->setValue(0);
         ui->cValueSpinBox->setValue(0);
         break;
+
     case HUESATURATION:
         ui->sHueSlider->setValue(0);
         ui->sHueSpinBox->setValue(0);
@@ -112,6 +121,7 @@ void ColorMenu::defaultSettings() {
         ui->sValueSlider->setValue(0);
         ui->sValueSpinBox->setValue(0);
         break;
+
     case BRIGHTNESSCONTRAST:
         ui->brightnessSlider->setValue(0);
         ui->brightnessSpinBox->setValue(0);
@@ -130,13 +140,15 @@ void ColorMenu::initUI() {
     timer = new QTimer(this);
     ui->tabWidget->tabBar()->hide();
 
-    switch(filterColor) {
+    switch (filterColor) {
     case COLORIZE:
         ui->tabWidget->setCurrentIndex(0);
         break;
+
     case HUESATURATION:
         ui->tabWidget->setCurrentIndex(1);
         break;
+
     case BRIGHTNESSCONTRAST:
         ui->tabWidget->setCurrentIndex(2);
         break;
@@ -148,7 +160,7 @@ void ColorMenu::initUI() {
 }
 
 void ColorMenu::createConnects() {
-    switch(filterColor) {
+    switch (filterColor) {
     case COLORIZE:
         connect(ui->cSaturationSlider, &QSlider::valueChanged, [this](int value) {
             ui->cSaturationSpinBox->setValue(value);
@@ -175,6 +187,7 @@ void ColorMenu::createConnects() {
             waitWithDraw();
         });
         break;
+
     case HUESATURATION:
         connect(ui->sSaturationSlider, &QSlider::valueChanged, [this](int value) {
             ui->sSaturationSpinBox->setValue(value);
@@ -201,6 +214,7 @@ void ColorMenu::createConnects() {
             waitWithDraw();
         });
         break;
+
     case BRIGHTNESSCONTRAST:
         connect(ui->brightnessSlider, &QSlider::valueChanged, [this](int value) {
             ui->brightnessSpinBox->setValue(value);

@@ -10,7 +10,7 @@ public:
     ~SelectionTool();
 
     void resizeSelectedTab();
-    qint8 ** getSelectedTab();
+    qint8 **getSelectedTab();
 
     QImage selectByColor(int mouse_x, int mouse_y, int threshold);
     QImage selectByColor(int mouse_x, int mouse_y, int threshold, int feather);

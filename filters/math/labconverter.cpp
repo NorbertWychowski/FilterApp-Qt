@@ -16,7 +16,7 @@ std::array<qreal, 3> LabConverter::toLAB(const QColor &color) {
     b = color.blue() / 255.0;
 
     if (r <= 0.04045)	r = r / 12.92;
-    else				r = qPow((r + 0.055) / 1.055, 2.4f);
+    else				r = qPow((r + 0.055) / 1.055, 2.4);
 
     if (g <= 0.04045)	g = g / 12.92;
     else				g = qPow((g + 0.055) / 1.055, 2.4);
@@ -42,11 +42,11 @@ std::array<qreal, 3> LabConverter::toLAB(const QColor &color) {
     else                fx = (7.787 * xr) + (0.13793103448275862068965517241379); // 16.0 / 116.0
 
     if (yr > 0.008856)  fy = qPow(yr, 0.33333333333333333333333333333333);
-    else                fy = (7.787* yr) + (0.13793103448275862068965517241379); // 16.0 / 116.0
+    else                fy = (7.787 * yr) + (0.13793103448275862068965517241379); // 16.0 / 116.0
 
     if (zr > 0.008856)  fz = qPow(zr, 0.33333333333333333333333333333333);
     else				fz = (7.787 * zr) + (0.13793103448275862068965517241379); // 16.0 / 116.0
 
-    return std::array<qreal, 3> {(116.0 * fy) - 16.0, 500.0* (fx - fy), 200.0f * (fy - fz)};
+    return std::array<qreal, 3> {(116.0 * fy) - 16.0, 500.0 * (fx - fy), 200.0 * (fy - fz)};
 }
 

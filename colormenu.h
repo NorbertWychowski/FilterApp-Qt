@@ -16,7 +16,7 @@ signals:
     void brightnessContrast(int B, int C);
 
 public:
-    explicit ColorMenu(int filterColor, QWidget* parent = 0);
+    explicit ColorMenu(int filterColor, QWidget *parent = nullptr);
     ~ColorMenu();
 
 private slots:
@@ -24,11 +24,11 @@ private slots:
     void defaultSettings();
 
 private:
-    Ui::ColorMenu* ui;
+    Ui::ColorMenu *ui;
 
     int filterColor;
 
-    QTimer* timer;
+    QTimer *timer;
 
     void waitWithDraw();
     void initUI();

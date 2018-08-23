@@ -1,7 +1,7 @@
 #include "custommaskdialog.h"
 #include "ui_custommaskdialog.h"
 
-CustomMaskDialog::CustomMaskDialog(QWidget* parent) : QDialog(parent), ui(new Ui::CustomMaskDialog) {
+CustomMaskDialog::CustomMaskDialog(QWidget *parent) : QDialog(parent), ui(new Ui::CustomMaskDialog) {
     ui->setupUi(this);
     setAttribute(Qt::WA_DeleteOnClose);
     setWindowFlags(windowFlags() & (~Qt::WindowContextHelpButtonHint));
@@ -16,8 +16,9 @@ CustomMaskDialog::CustomMaskDialog(QWidget* parent) : QDialog(parent), ui(new Ui
 }
 
 CustomMaskDialog::~CustomMaskDialog() {
-    while (!spinBoxes.empty())
-        delete spinBoxes.front(), spinBoxes.pop_front();
+    for (auto x : spinBoxes)
+        delete x;
+
     delete ui;
 }
 
@@ -26,9 +27,10 @@ void CustomMaskDialog::buttonBoxAccepted() {
     int i = 0;
     int j = 0;
 
-    for (QSpinBox* spinBox : spinBoxes) {
+    for (QSpinBox *spinBox : spinBoxes) {
         matrix[i++][j] = spinBox->value();
-        if(i == 5) {
+
+        if (i == 5) {
             j++;
             i = 0;
         }
@@ -39,16 +41,17 @@ void CustomMaskDialog::buttonBoxAccepted() {
 
 void CustomMaskDialog::createSpinBoxes() {
     int j = 0;
+
     for (int i = 0; i < 25; i++) {
         if (i % 5 == 0)
             j++;
 
-        QSpinBox* spinBox = new QSpinBox();
+        QSpinBox *spinBox = new QSpinBox();
         spinBox->setMinimum(-100);
         spinBox->setMaximum(100);
         spinBox->setValue(0);
         spinBox->setButtonSymbols(QSpinBox::NoButtons);
-        qobject_cast<QGridLayout*>(ui->widget->layout())->addWidget(spinBox, j, i % 5);
+        qobject_cast<QGridLayout *>(ui->widget->layout())->addWidget(spinBox, j, i % 5);
         spinBoxes.push_back(spinBox);
     }
 }

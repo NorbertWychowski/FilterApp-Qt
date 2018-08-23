@@ -14,7 +14,7 @@ void FilterGraphicsView::mousePressEvent(QMouseEvent *event) {
 }
 
 void FilterGraphicsView::mouseMoveEvent(QMouseEvent *event) {
-    if(event->buttons() & Qt::LeftButton) {
+    if (event->buttons() & Qt::LeftButton) {
         emit updatePos(offset - event->pos());
     }
 }

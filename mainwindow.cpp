@@ -13,7 +13,7 @@
 #include <QTimer>
 #include <QSignalMapper>
 
-MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
+MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
     ui->setupUi(this);
 
     installEventFilter(this);
@@ -41,10 +41,15 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
     ui->zoomSlider->setMaximum(myGraphicsView::getZoomValues().size());
 
     int pos = 1;
-    for(auto it :  myGraphicsView::getZoomValues().keys()) {
-        if(it == 1.0) break;
+
+    for (auto it :  myGraphicsView::getZoomValues().keys()) {
+        if (it == 1.0) {
+            break;
+        }
+
         pos++;
     }
+
     ui->zoomSlider->setValue(pos);
 }
 
@@ -61,8 +66,12 @@ void MainWindow::zoomChanged(double key) {
     ui->zoomLabel->setText(myGraphicsView::getZoomValues().value(key));
 
     int pos = 1;
-    for(auto it :  myGraphicsView::getZoomValues().keys()) {
-        if(it == key) break;
+
+    for (auto it :  myGraphicsView::getZoomValues().keys()) {
+        if (key == it) {
+            break;
+        }
+
         pos++;
     }
 
@@ -71,8 +80,9 @@ void MainWindow::zoomChanged(double key) {
 
 void MainWindow::zoomSliderChanged(int value) {
     int pos = 1;
-    for(auto it :  myGraphicsView::getZoomValues().keys()) {
-        if(pos++ == value) {
+
+    for (auto it :  myGraphicsView::getZoomValues().keys()) {
+        if (pos++ == value) {
             ui->graphicsView->setZoom(it);
             ui->zoomLabel->setText(myGraphicsView::getZoomValues().value(it));
             break;
@@ -82,11 +92,14 @@ void MainWindow::zoomSliderChanged(int value) {
 
 void MainWindow::openFileAction() {
     QString file = QFileDialog::getOpenFileName(this, tr("Otwórz"), "C://", tr("Wszystkie pliki (*.*);;"
-                   "JPEG (*.jpg *jpeg);; PNG (*.png)"), &QString(tr("Wszystkie pliki (*.*)")));
-    if(!file.isEmpty()) {
+                   "JPEG (*.jpg *jpeg);; PNG (*.png)"));
+
+    if (!file.isEmpty()) {
         image.load(file);
-        if (image.format() != QImage::Format_RGB32)
+
+        if (image.format() != QImage::Format_RGB32) {
             image = image.convertToFormat(QImage::Format_RGB32);
+        }
 
         ui->actionSaveAs->setEnabled(true);
         ui->groupBox->setEnabled(true);
@@ -119,6 +132,7 @@ void MainWindow::setCustomFilter(Matrix matrix) {
     QApplication::setOverrideCursor(Qt::BusyCursor);
 
     redoStack.clear();
+
     if (isSelectMask) {
         undoStack.push(image);
         image = filterTool->splot(image, USER_FILTER, selectTool->getSelectedTab(), matrix);
@@ -127,6 +141,7 @@ void MainWindow::setCustomFilter(Matrix matrix) {
         undoStack.push(image);
         image = filterTool->splot(image, USER_FILTER, matrix);
     }
+
     imageItem->setPixmap(QPixmap::fromImage(image));
     selectTool->resizeSelectedTab();
 
@@ -137,6 +152,7 @@ void MainWindow::laplaceFilter() {
     QApplication::setOverrideCursor(Qt::BusyCursor);
 
     redoStack.clear();
+
     if (isSelectMask) {
         undoStack.push(image);
         image = filterTool->splot(image, LAPLACE_FILTER, selectTool->getSelectedTab());
@@ -145,6 +161,7 @@ void MainWindow::laplaceFilter() {
         undoStack.push(image);
         image = filterTool->splot(image, LAPLACE_FILTER);
     }
+
     imageItem->setPixmap(QPixmap::fromImage(image));
     selectTool->resizeSelectedTab();
 
@@ -160,10 +177,13 @@ void MainWindow::lowPassFilter() {
 
         undoStack.push(image);
         redoStack.clear();
-        if(isSelectMask)
+
+        if (isSelectMask) {
             image = filterTool->lowPassFilter(image, radius, selectTool->getSelectedTab());
-        else
+        } else {
             image = filterTool->lowPassFilter(image, radius);
+        }
+
         imageItem->setPixmap(QPixmap::fromImage(image));
 
         QApplication::setOverrideCursor(Qt::ArrowCursor);
@@ -179,10 +199,13 @@ void MainWindow::gaussFilter() {
 
         undoStack.push(image);
         redoStack.clear();
-        if(isSelectMask)
+
+        if (isSelectMask) {
             image = filterTool->gaussianFilter(image, radius, selectTool->getSelectedTab());
-        else
+        } else {
             image = filterTool->gaussianFilter(image, radius);
+        }
+
         imageItem->setPixmap(QPixmap::fromImage(image));
 
         QApplication::setOverrideCursor(Qt::ArrowCursor);
@@ -193,6 +216,7 @@ void MainWindow::highPassFilter() {
     QApplication::setOverrideCursor(Qt::BusyCursor);
 
     redoStack.clear();
+
     if (isSelectMask) {
         undoStack.push(image);
         image = filterTool->splot(image, HIGHPASS_FILTER, selectTool->getSelectedTab());
@@ -201,6 +225,7 @@ void MainWindow::highPassFilter() {
         undoStack.push(image);
         image = filterTool->splot(image, HIGHPASS_FILTER);
     }
+
     imageItem->setPixmap(QPixmap::fromImage(image));
     selectTool->resizeSelectedTab();
 
@@ -208,8 +233,9 @@ void MainWindow::highPassFilter() {
 }
 
 void MainWindow::showHistogram() {
-    if(!image.isNull())
+    if (!image.isNull()) {
         histogram = new Histogram(image, this);
+    }
 }
 
 void MainWindow::colorFilter(int colorFilter) {
@@ -218,57 +244,62 @@ void MainWindow::colorFilter(int colorFilter) {
     redoStack.clear();
     undoStack.push(image);
 
-    switch(colorFilter) {
+    switch (colorFilter) {
     case NEGATIVE:
         image = ColorTool::negative(image);
         break;
+
     case SEPIA:
         image = ColorTool::sepia(image);
         break;
+
     case DESATURATE:
         image = ColorTool::desaturate(image);
         break;
+
     case COLORIZE:
         colorMenu = new ColorMenu(COLORIZE, this);
         colorMenu->setWindowTitle("Koloryzacja");
 
-        connect(colorMenu, &QDialog::rejected, [&, this]() {
+        connect(colorMenu, &QDialog::rejected, [ &, this]() {
             imageItem->setPixmap(QPixmap::fromImage(image));
         });
-        connect(colorMenu, &ColorMenu::colors, [&, this](int H, int S, int V) {
+        connect(colorMenu, &ColorMenu::colors, [ &, this](int H, int S, int V) {
             imageItem->setPixmap(QPixmap::fromImage(ColorTool::colorize(H, S, V, image)));
         });
-        connect(colorMenu, &ColorMenu::accepted, [&, this]() {
+        connect(colorMenu, &ColorMenu::accepted, [ &, this]() {
             image = imageItem->pixmap().toImage();
             imageItem->setPixmap(QPixmap::fromImage(image));
         });
         break;
+
     case HUESATURATION:
         colorMenu = new ColorMenu(HUESATURATION, this);
         colorMenu->setWindowTitle("Barwa i nasycenie");
 
-        connect(colorMenu, &QDialog::rejected, [&, this]() {
+        connect(colorMenu, &QDialog::rejected, [ &, this]() {
             imageItem->setPixmap(QPixmap::fromImage(image));
         });
-        connect(colorMenu, &ColorMenu::colors, [&, this](int H, int S, int V) {
+        connect(colorMenu, &ColorMenu::colors, [ &, this](int H, int S, int V) {
             imageItem->setPixmap(QPixmap::fromImage(ColorTool::hueSaturation(H, S, V, image)));
         });
-        connect(colorMenu, &ColorMenu::accepted, [&, this]() {
+        connect(colorMenu, &ColorMenu::accepted, [ &, this]() {
             image = imageItem->pixmap().toImage();
             imageItem->setPixmap(QPixmap::fromImage(image));
         });
         break;
+
     case BRIGHTNESSCONTRAST:
         colorMenu = new ColorMenu(BRIGHTNESSCONTRAST, this);
         colorMenu->setWindowTitle("Jasność i kontrast");
 
-        connect(colorMenu, &QDialog::rejected, [&, this]() {
+        connect(colorMenu, &QDialog::rejected, [ &, this]() {
             imageItem->setPixmap(QPixmap::fromImage(image));
         });
-        connect(colorMenu, &ColorMenu::brightnessContrast, [&, this](int B, int C) {
+        connect(colorMenu, &ColorMenu::brightnessContrast, [ &, this](int B, int C) {
             imageItem->setPixmap(QPixmap::fromImage(ColorTool::brightnessContrast(B, C, image)));
         });
-        connect(colorMenu, &ColorMenu::accepted, [&, this]() {
+        connect(colorMenu, &ColorMenu::accepted, [ &, this]() {
             image = imageItem->pixmap().toImage();
             imageItem->setPixmap(QPixmap::fromImage(image));
         });
@@ -280,9 +311,9 @@ void MainWindow::colorFilter(int colorFilter) {
     QApplication::setOverrideCursor(Qt::ArrowCursor);
 }
 
-void MainWindow::keyPressEvent(QKeyEvent* event) {
-    if((event->key() == Qt::Key_Z) && (QGuiApplication::keyboardModifiers() & Qt::ControlModifier)) {
-        if(!undoStack.isEmpty()) {
+void MainWindow::keyPressEvent(QKeyEvent *event) {
+    if ((event->key() == Qt::Key_Z) && (QGuiApplication::keyboardModifiers() & Qt::ControlModifier)) {
+        if (!undoStack.isEmpty()) {
             QImage tmp = undoStack.pop();
             redoStack.push(image);
             image = tmp.copy();
@@ -296,8 +327,9 @@ void MainWindow::keyPressEvent(QKeyEvent* event) {
             isSelectMask = false;
         }
     }
-    if((event->key() == Qt::Key_Y) && (QGuiApplication::keyboardModifiers() & Qt::ControlModifier)) {
-        if(!redoStack.isEmpty()) {
+
+    if ((event->key() == Qt::Key_Y) && (QGuiApplication::keyboardModifiers() & Qt::ControlModifier)) {
+        if (!redoStack.isEmpty()) {
             QImage tmp = redoStack.pop();
             undoStack.push(image);
             image = tmp.copy();
@@ -311,9 +343,9 @@ void MainWindow::keyPressEvent(QKeyEvent* event) {
     }
 }
 
-void MainWindow::mousePressEvent(QMouseEvent* event) {
+void MainWindow::mousePressEvent(QMouseEvent *event) {
     if (event->buttons() & Qt::LeftButton) {
-        if(ui->selectByColorButton->isChecked()) {
+        if (ui->selectByColorButton->isChecked()) {
             QPoint local = ui->graphicsView->mapFromGlobal(event->globalPos());
             QPointF l = ui->graphicsView->mapToScene(local);
             double value = ui->featherSlider->value();
@@ -324,10 +356,12 @@ void MainWindow::mousePressEvent(QMouseEvent* event) {
             selectedAreaItem = new QGraphicsPixmapItem();
             scene->addItem(selectedAreaItem);
 
-            if (ui->featherCheckBox->isChecked() && value != 0) {
-                selectedAreaItem->setPixmap(QPixmap::fromImage(selectTool->selectByColor(l.x(), l.y(), ui->thresholdSlider->value(), value)));
+            if (ui->featherCheckBox->isChecked() && value != 0.0) {
+                selectedAreaItem->setPixmap(QPixmap::fromImage(selectTool->selectByColor(static_cast<int>(l.x()), static_cast<int>(l.y()),
+                                            ui->thresholdSlider->value(), static_cast<int>(value))));
             } else {
-                selectedAreaItem->setPixmap(QPixmap::fromImage(selectTool->selectByColor(l.x(), l.y(), ui->thresholdSlider->value())));
+                selectedAreaItem->setPixmap(QPixmap::fromImage(selectTool->selectByColor(static_cast<int>(l.x()), static_cast<int>(l.y()),
+                                            ui->thresholdSlider->value())));
             }
 
             isSelectMask = true;
@@ -345,7 +379,8 @@ void MainWindow::thresholdSliderValueChanged(int value) {
 
 void MainWindow::brushSizeSliderValueChanged(int value) {
     ui->brushSizeLabel->setNum(value);
-    if(brushColor.spec() != QColor::Invalid) {
+
+    if (brushColor.spec() != QColor::Invalid) {
         ui->graphicsView->setBrush(brushColor, value);
         ui->brushColorButton->setStyleSheet("background-color: " + brushColor.name());
     }
@@ -377,6 +412,7 @@ void MainWindow::selectByColorButtonClicked(bool) {
 
     selectedAreaItem->setPixmap(QPixmap());
     ui->graphicsView->disableRectSelect();
+    ui->graphicsView->disableBrush();
     isSelectMask = false;
 
     ui->toolsOptions->setCurrentIndex(0);
@@ -399,7 +435,8 @@ void MainWindow::brushButtonClicked(bool) {
 
 void MainWindow::brushColorButtonClicked(bool) {
     QColor tmp  = QColorDialog::getColor(Qt::green, this, "Wybierz kolor");
-    if(tmp.spec() != QColor::Invalid) {
+
+    if (tmp.spec() != QColor::Invalid) {
         brushColor = tmp;
         ui->graphicsView->setBrush(brushColor, ui->brushSizeSlider->value());
         ui->brushColorButton->setStyleSheet("background-color: " + brushColor.name());
@@ -409,10 +446,21 @@ void MainWindow::brushColorButtonClicked(bool) {
 void MainWindow::rectangleSelection(QRect rectangleSelectionArea) {
     QRect tmp = rectangleSelectionArea;
 
-    if(tmp.left() < 0) tmp.setLeft(0);
-    if(tmp.right() >= image.width()) tmp.setRight(image.width() - 1);
-    if(tmp.top() < 0) tmp.setTop(0);
-    if(tmp.bottom() >= image.height()) tmp.setBottom(image.height() - 1);
+    if (tmp.left() < 0) {
+        tmp.setLeft(0);
+    }
+
+    if (tmp.top() < 0) {
+        tmp.setTop(0);
+    }
+
+    if (tmp.right() >= image.width()) {
+        tmp.setRight(image.width() - 1);
+    }
+
+    if (tmp.bottom() >= image.height()) {
+        tmp.setBottom(image.height() - 1);
+    }
 
     scene->removeItem(selectedAreaItem);
     selectedAreaItem = new QGraphicsPixmapItem();
@@ -437,8 +485,9 @@ void MainWindow::updateUndoRedoStack() {
 
     image = ui->graphicsView->getImage();
 
-    for(QImage i : tmp)
+    for (QImage i : tmp) {
         undoStack.push(i);
+    }
 
     redoStack.clear();
 }
@@ -456,34 +505,38 @@ void MainWindow::createConnects() {
     connect(ui->actionHistogram,    SIGNAL(triggered(bool)), SLOT(showHistogram()));
 
     //filtry koloru
-    QSignalMapper* signalMapper = new QSignalMapper(this);
-    connect(ui->actionNegative,           SIGNAL(triggered()), signalMapper, SLOT(map()));
-    connect(ui->actionSepia,              SIGNAL(triggered()), signalMapper, SLOT(map()));
-    connect(ui->actionDesaturate,         SIGNAL(triggered()), signalMapper, SLOT(map()));
-    connect(ui->actionColorize,           SIGNAL(triggered()), signalMapper, SLOT(map()));
-    connect(ui->actionBrightnessContrast, SIGNAL(triggered()), signalMapper, SLOT(map()));
-    connect(ui->actionHueSaturation,      SIGNAL(triggered()), signalMapper, SLOT(map()));
-    signalMapper->setMapping(ui->actionNegative,           NEGATIVE);
-    signalMapper->setMapping(ui->actionSepia,              SEPIA);
-    signalMapper->setMapping(ui->actionDesaturate,         DESATURATE);
-    signalMapper->setMapping(ui->actionColorize,           COLORIZE);
-    signalMapper->setMapping(ui->actionBrightnessContrast, BRIGHTNESSCONTRAST);
-    signalMapper->setMapping(ui->actionHueSaturation,      HUESATURATION);
-    connect(signalMapper, SIGNAL(mapped(int)), SLOT(colorFilter(int)));
+    connect(ui->actionNegative,           &QAction::triggered, this, [this]() {
+        colorFilter(NEGATIVE);
+    });
+    connect(ui->actionSepia,              &QAction::triggered, this, [this]() {
+        colorFilter(SEPIA);
+    });
+    connect(ui->actionDesaturate,         &QAction::triggered, this, [this]() {
+        colorFilter(DESATURATE);
+    });
+    connect(ui->actionColorize,           &QAction::triggered, this, [this]() {
+        colorFilter(COLORIZE);
+    });
+    connect(ui->actionBrightnessContrast, &QAction::triggered, this, [this]() {
+        colorFilter(BRIGHTNESSCONTRAST);
+    });
+    connect(ui->actionHueSaturation,      &QAction::triggered, this, [this]() {
+        colorFilter(HUESATURATION);
+    });
 
     //kontrolki i zoom
-    connect(ui->graphicsView,          SIGNAL(zoomChanged(double)), SLOT(zoomChanged(double)));
-    connect(ui->zoomSlider,            SIGNAL(valueChanged(int)),   SLOT(zoomSliderChanged(int)));
-    connect(ui->thresholdSlider,       SIGNAL(valueChanged(int)),   SLOT(thresholdSliderValueChanged(int)));
-    connect(ui->brushSizeSlider,       SIGNAL(valueChanged(int)),   SLOT(brushSizeSliderValueChanged(int)));
-    connect(ui->featherSlider,         SIGNAL(valueChanged(int)),   SLOT(featherSliderValueChanged(int)));
-    connect(ui->featherCheckBox,       SIGNAL(clicked(bool)),       SLOT(featherCheckBoxChanged(bool)));
-    connect(ui->selectByColorButton,   SIGNAL(clicked(bool)),       SLOT(selectByColorButtonClicked(bool)));
-    connect(ui->brushButton,           SIGNAL(clicked(bool)),       SLOT(brushButtonClicked(bool)));
-    connect(ui->brushColorButton,      SIGNAL(clicked(bool)),       SLOT(brushColorButtonClicked(bool)));
-    connect(ui->rectangleSelectButton, SIGNAL(clicked(bool)),       SLOT(rectangleSelectButtonClicked(bool)));
-    connect(ui->graphicsView,          SIGNAL(selectedArea(QRect)), SLOT(rectangleSelection(QRect)));
-    connect(&timer,                    SIGNAL(timeout()),           SLOT(invertSelectedAreaColors()));
+    connect(ui->graphicsView,          SIGNAL(zoomChanged(double)),   SLOT(zoomChanged(double)));
+    connect(ui->zoomSlider,            SIGNAL(valueChanged(int)),     SLOT(zoomSliderChanged(int)));
+    connect(ui->thresholdSlider,       SIGNAL(valueChanged(int)),     SLOT(thresholdSliderValueChanged(int)));
+    connect(ui->brushSizeSlider,       SIGNAL(valueChanged(int)),     SLOT(brushSizeSliderValueChanged(int)));
+    connect(ui->featherSlider,         SIGNAL(valueChanged(int)),     SLOT(featherSliderValueChanged(int)));
+    connect(ui->featherCheckBox,       SIGNAL(clicked(bool)),         SLOT(featherCheckBoxChanged(bool)));
+    connect(ui->selectByColorButton,   SIGNAL(clicked(bool)),         SLOT(selectByColorButtonClicked(bool)));
+    connect(ui->brushButton,           SIGNAL(clicked(bool)),         SLOT(brushButtonClicked(bool)));
+    connect(ui->brushColorButton,      SIGNAL(clicked(bool)),         SLOT(brushColorButtonClicked(bool)));
+    connect(ui->rectangleSelectButton, SIGNAL(clicked(bool)),         SLOT(rectangleSelectButtonClicked(bool)));
+    connect(ui->graphicsView,          SIGNAL(selectedArea(QRect)),   SLOT(rectangleSelection(QRect)));
+    connect(&timer,                    SIGNAL(timeout()),             SLOT(invertSelectedAreaColors()));
     connect(ui->graphicsView,          SIGNAL(updateUndoRedoStack()), SLOT(updateUndoRedoStack()));
 }
 
