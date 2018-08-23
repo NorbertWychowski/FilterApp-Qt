@@ -505,24 +505,12 @@ void MainWindow::createConnects() {
     connect(ui->actionHistogram,    SIGNAL(triggered(bool)), SLOT(showHistogram()));
 
     //filtry koloru
-    connect(ui->actionNegative,           &QAction::triggered, this, [this]() {
-        colorFilter(NEGATIVE);
-    });
-    connect(ui->actionSepia,              &QAction::triggered, this, [this]() {
-        colorFilter(SEPIA);
-    });
-    connect(ui->actionDesaturate,         &QAction::triggered, this, [this]() {
-        colorFilter(DESATURATE);
-    });
-    connect(ui->actionColorize,           &QAction::triggered, this, [this]() {
-        colorFilter(COLORIZE);
-    });
-    connect(ui->actionBrightnessContrast, &QAction::triggered, this, [this]() {
-        colorFilter(BRIGHTNESSCONTRAST);
-    });
-    connect(ui->actionHueSaturation,      &QAction::triggered, this, [this]() {
-        colorFilter(HUESATURATION);
-    });
+    connect(ui->actionNegative,           &QAction::triggered, this, [this]() { colorFilter(NEGATIVE); });
+    connect(ui->actionSepia,              &QAction::triggered, this, [this]() { colorFilter(SEPIA); });
+    connect(ui->actionDesaturate,         &QAction::triggered, this, [this]() { colorFilter(DESATURATE); });
+    connect(ui->actionColorize,           &QAction::triggered, this, [this]() { colorFilter(COLORIZE); });
+    connect(ui->actionBrightnessContrast, &QAction::triggered, this, [this]() { colorFilter(BRIGHTNESSCONTRAST); });
+    connect(ui->actionHueSaturation,      &QAction::triggered, this, [this]() { colorFilter(HUESATURATION); });
 
     //kontrolki i zoom
     connect(ui->graphicsView,          SIGNAL(zoomChanged(double)),   SLOT(zoomChanged(double)));
